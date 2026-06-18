@@ -6,6 +6,21 @@
 
 ---
 
+## طريقة سريعة (سكربت آلي كامل)
+
+بدل تنفيذ الخطوات يدوياً، يمكنك استخدام سكربت الإعداد الجاهز الذي يثبّت كل شيء (Node + PostgreSQL + Nginx + PM2 + SSL):
+
+```bash
+wget https://raw.githubusercontent.com/mouhcineelhaloui3-jpg/VITARO/master/deploy/server-setup.sh
+nano server-setup.sh    # عدّل المتغيّرات في الأعلى (DOMAIN, DB_PASSWORD, ADMIN_PASSWORD)
+chmod +x server-setup.sh
+./server-setup.sh
+```
+
+السكربت يقوم بكل شيء تلقائياً حتى تشغيل الموقع مع HTTPS. إن أردت التحكم اليدوي، اتبع الخطوات التفصيلية أدناه.
+
+---
+
 ## 0. المتطلبات
 
 - Hostinger VPS (Ubuntu 22.04 أو 24.04).
