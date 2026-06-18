@@ -86,8 +86,9 @@ export async function getBrand(): Promise<BrandSettings> {
 
 // ─── NAVIGATION ────────────────────────────────────────────────────────────
 
-export async function getNavigation(): Promise<typeof staticNav> {
-  return staticNav;
+export async function getNavigation() {
+  const { getNavigation: getNav } = await import("@/lib/cms/site");
+  return getNav();
 }
 
 // ─── TESTIMONIALS ──────────────────────────────────────────────────────────

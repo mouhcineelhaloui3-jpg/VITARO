@@ -18,9 +18,21 @@ import {
   AlignLeft,
   Home,
   Globe,
+  Menu,
+  PanelBottom,
+  BookOpen,
+  Megaphone,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { brand as staticBrand, faqs as staticFaqs, testimonials as staticTestimonials } from "@/lib/data/content";
+import {
+  AnnouncementSection,
+  BlogSection,
+  FooterSection,
+  HeaderSection,
+  HomeSectionsPanel,
+  NavigationSection,
+} from "@/features/admin/site-cms-sections";
 
 const fetcher = (url: string) => fetch(url).then((r) => (r.ok ? r.json() : []));
 
@@ -409,7 +421,13 @@ function SaveBar({ saving, saved, onSave }: { saving: boolean; saved: boolean; o
 
 const SECTIONS = [
   { key: "settings", label: "إعدادات الموقع", icon: Settings, route: "/" },
+  { key: "header", label: "الهيدر والشعار", icon: Menu, route: "/" },
+  { key: "navigation", label: "قائمة التنقل", icon: Globe, route: "/" },
+  { key: "announcement", label: "شريط الإعلانات", icon: Megaphone, route: "/" },
   { key: "hero", label: "الصفحة الرئيسية (Hero)", icon: Home, route: "/" },
+  { key: "home-sections", label: "أقسام الصفحة الرئيسية", icon: Package, route: "/" },
+  { key: "footer", label: "الفوتر", icon: PanelBottom, route: "/" },
+  { key: "blog", label: "المدونة", icon: BookOpen, route: "/blog" },
   { key: "testimonials", label: "تقييمات الزبناء", icon: Star, route: "/#reviews" },
   { key: "faq", label: "الأسئلة الشائعة", icon: AlignLeft, route: "/#faq" },
 ];
@@ -426,9 +444,13 @@ export default function AdminContentPage() {
     mutate("/api/admin/cms/content");
     mutate("/api/admin/cms/testimonials");
     mutate("/api/admin/cms/faqs");
+    mutate("/api/admin/cms/blog");
   }, []);
 
   const hasConfigs = configs.length > 0;
+  const headerConfigs = configs.filter((c) => c.group === "header");
+  const footerConfigs = configs.filter((c) => c.group === "footer");
+  const navConfigs = configs.filter((c) => c.group === "nav");
 
   return (
     <div className="space-y-6">
@@ -466,8 +488,14 @@ export default function AdminContentPage() {
 
               {isOpen && (
                 <div className="border-t border-slate-100 p-5 dark:border-white/5">
-                  {section.key === "settings" && <SettingsSection configs={configs} />}
+                  {section.key === "settings" && <SettingsSection configs={configs.filter((c) => c.group === "brand")} />}
+                  {section.key === "header" && <HeaderSection configs={headerConfigs} />}
+                  {section.key === "navigation" && <NavigationSection configs={navConfigs} />}
+                  {section.key === "announcement" && <AnnouncementSection blocks={contentBlocks} />}
                   {section.key === "hero" && <HeroSection blocks={contentBlocks} />}
+                  {section.key === "home-sections" && <HomeSectionsPanel blocks={contentBlocks} />}
+                  {section.key === "footer" && <FooterSection configs={footerConfigs} />}
+                  {section.key === "blog" && <BlogSection />}
                   {section.key === "testimonials" && <TestimonialsSection />}
                   {section.key === "faq" && <FaqSection />}
                 </div>

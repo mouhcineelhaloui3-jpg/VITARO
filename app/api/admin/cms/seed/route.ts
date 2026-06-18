@@ -2,7 +2,21 @@ import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
 import { products as staticProducts } from "@/lib/data/catalog";
-import { brand, testimonials, faqs, navigation } from "@/lib/data/content";
+import {
+  brand,
+  testimonials,
+  faqs,
+  navigation,
+  blogArticles,
+} from "@/lib/data/content";
+import {
+  defaultAnnouncement,
+  defaultFooter,
+  defaultFooterHelpLinks,
+  defaultHeader,
+  defaultHomeSections,
+  defaultTrustChips,
+} from "@/lib/cms/defaults";
 
 export async function POST() {
   const session = await requireAdminSession();
@@ -30,6 +44,44 @@ export async function POST() {
       configCount++;
     }
     results.siteConfig = configCount;
+
+    const headerEntries = Object.entries(defaultHeader).map(([key, value]) => ({
+      key,
+      value: String(value),
+      group: "header",
+    }));
+    for (const entry of headerEntries) {
+      await prisma.siteConfig.upsert({
+        where: { key: entry.key },
+        update: { value: entry.value, group: entry.group },
+        create: entry,
+      });
+    }
+
+    const footerEntries = Object.entries(defaultFooter).map(([key, value]) => ({
+      key,
+      value: String(value),
+      group: "footer",
+    }));
+    for (const entry of footerEntries) {
+      await prisma.siteConfig.upsert({
+        where: { key: entry.key },
+        update: { value: entry.value, group: entry.group },
+        create: entry,
+      });
+    }
+
+    await prisma.siteConfig.upsert({
+      where: { key: "helpLinks" },
+      update: { value: JSON.stringify(defaultFooterHelpLinks), group: "footer" },
+      create: { key: "helpLinks", value: JSON.stringify(defaultFooterHelpLinks), group: "footer" },
+    });
+
+    await prisma.siteConfig.upsert({
+      where: { key: "navigation" },
+      update: { value: JSON.stringify(navigation), group: "nav" },
+      create: { key: "navigation", value: JSON.stringify(navigation), group: "nav" },
+    });
 
     // 2. Seed testimonials
     const existingTestimonials = await prisma.testimonial.count();
@@ -118,7 +170,22 @@ export async function POST() {
       { page: "home", section: "hero", key: "badge", value: "الميزان الذكي رقم 1 فالمغرب" },
       { page: "home", section: "hero", key: "cta_whatsapp", value: "طلب عبر واتساب" },
       { page: "home", section: "hero", key: "cta_buy", value: "شري دابا" },
-      { page: "home", section: "announcement", key: "text", value: "🇲🇦 توصيل لجميع مدن المغرب — خلّص فالدار (COD) — ضمان سنتين" },
+      { page: "home", section: "announcement", key: "text", value: defaultAnnouncement.text },
+      { page: "home", section: "announcement", key: "chip1", value: defaultAnnouncement.chip1 },
+      { page: "home", section: "announcement", key: "chip2", value: defaultAnnouncement.chip2 },
+      { page: "home", section: "announcement", key: "chip3", value: defaultAnnouncement.chip3 },
+      ...Object.entries(defaultHomeSections).map(([key, value]) => ({
+        page: "home",
+        section: "sections",
+        key,
+        value,
+      })),
+      {
+        page: "home",
+        section: "sections",
+        key: "trust_chips",
+        value: JSON.stringify(defaultTrustChips),
+      },
     ];
     for (const b of heroBlocks) {
       await prisma.contentBlock.upsert({
@@ -128,6 +195,25 @@ export async function POST() {
       });
     }
     results.contentBlocks = await prisma.contentBlock.count();
+
+    const existingBlogPosts = await prisma.blogPost.count();
+    if (existingBlogPosts === 0) {
+      for (let i = 0; i < blogArticles.length; i++) {
+        const article = blogArticles[i];
+        await prisma.blogPost.create({
+          data: {
+            slug: article.slug,
+            title: article.title,
+            category: article.category,
+            excerpt: article.excerpt,
+            readTime: article.readTime,
+            body: "هاد المقال جاهز للتحرير من لوحة التحكم. يمكنك إضافة محتوى تعليمي، روابط داخلية، ونصائح صحية مفصلة.",
+            sortOrder: i,
+          },
+        });
+      }
+    }
+    results.blogPosts = await prisma.blogPost.count();
 
     return NextResponse.json({ ok: true, seeded: results });
   } catch (err) {

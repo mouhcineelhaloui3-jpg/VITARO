@@ -22,19 +22,18 @@ import { Reveal } from "@/components/motion/reveal";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, FeatureCard } from "@/components/ui/card";
-import { getProducts, getTestimonials, getFaqs } from "@/lib/cms/db";
+import { getProducts, getTestimonials, getFaqs, getBrand } from "@/lib/cms/db";
+import { getHomeContent } from "@/lib/cms/site";
+import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
 import { formatCurrency } from "@/lib/utils";
 
-const whatsappOrderLink = (title: string, price: number) =>
-  `https://wa.me/212682217644?text=${encodeURIComponent(
-    `سلام، بغيت نطلب ${title} بثمن ${price} درهم`,
-  )}`;
-
 export default async function Home() {
-  const [allProducts, testimonials, faqs] = await Promise.all([
+  const [allProducts, testimonials, faqs, home, brand] = await Promise.all([
     getProducts(),
     getTestimonials(),
     getFaqs(),
+    getHomeContent(),
+    getBrand(),
   ]);
   const product = allProducts[0];
 
@@ -42,10 +41,16 @@ export default async function Home() {
     throw new Error("No products configured for the storefront.");
   }
 
+  const whatsappOrderLink = (title: string, price: number) =>
+    buildWhatsAppUrl(
+      brand.whatsapp,
+      `سلام، بغيت نطلب ${title} بثمن ${price} درهم`,
+    );
+
   const trustChips = [
-    { icon: Truck, label: "توصيل لجميع المدن" },
-    { icon: ShieldCheck, label: "خلّص فالدار (COD)" },
-    { icon: BadgeCheck, label: "ضمان سنتين" },
+    { icon: Truck, label: home.trustChips[0] ?? "توصيل لجميع المدن" },
+    { icon: ShieldCheck, label: home.trustChips[1] ?? "خلّص فالدار (COD)" },
+    { icon: BadgeCheck, label: home.trustChips[2] ?? "ضمان سنتين" },
   ];
 
   const steps = [
@@ -62,14 +67,14 @@ export default async function Home() {
         
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <Reveal>
-            <Badge variant="success">الميزان الذكي رقم 1 فالمغرب</Badge>
+            <Badge variant="success">{home.hero.badge}</Badge>
             
             <h1 className="mt-6 text-[2.75rem] font-extrabold leading-[1.1] tracking-[-0.04em] text-heading sm:text-6xl lg:text-[4rem]">
-              عرف جسمك بزاف ديال التفاصيل، فثواني.
+              {home.hero.title}
             </h1>
             
             <p className="mt-7 max-w-xl text-[1.125rem] leading-[1.75] text-body">
-              ميزان ذكي كيقيس ليك الوزن، الشحم، العضلات، الماء وأكثر من 13 مؤشر. كولشي كيمشي مباشرة لتيليفونك.
+              {home.hero.subtitle}
             </p>
 
             <div className="mt-8 flex items-end gap-4">
@@ -90,10 +95,10 @@ export default async function Home() {
                 variant="primary"
               >
                 <MessageCircle className="h-5 w-5" />
-                طلب عبر واتساب
+                {home.hero.cta_whatsapp}
               </ButtonLink>
               <ButtonLink href={`/products/${product.slug}`} size="lg" variant="secondary">
-                شري دابا
+                {home.hero.cta_buy}
                 <ArrowLeft className="h-5 w-5" />
               </ButtonLink>
             </div>
@@ -129,8 +134,8 @@ export default async function Home() {
       {/* KEY BENEFITS */}
       <Section
         background="white"
-        eyebrow="علاش فيتارو"
-        title="ماشي غير ميزان، هو مدرب صحتك."
+        eyebrow={home.sections.benefits_eyebrow}
+        title={home.sections.benefits_title}
       >
         <div className="grid gap-6 sm:grid-cols-2">
           {product.features.map((feature) => (
@@ -155,8 +160,8 @@ export default async function Home() {
       <Section 
         background="gray"
         id="how" 
-        eyebrow="كيفاش كيخدم" 
-        title="ساهل بزاف. 3 خطوات."
+        eyebrow={home.sections.how_eyebrow}
+        title={home.sections.how_title}
       >
         <div className="grid gap-6 md:grid-cols-3">
           {steps.map((step, index) => (
@@ -181,8 +186,8 @@ export default async function Home() {
       {/* METRICS */}
       <Section
         background="white"
-        eyebrow="شنو كيقيس؟"
-        title="أكثر من 12 مؤشر باش تفهم جسمك مزيان."
+        eyebrow={home.sections.metrics_eyebrow}
+        title={home.sections.metrics_title}
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[
@@ -209,8 +214,8 @@ export default async function Home() {
       {/* QUALITY */}
       <Section
         background="gray"
-        eyebrow="جودة واستعمال يومي"
-        title="مصنوع باش يكون قوي، واضح، وساهل فالاستعمال."
+        eyebrow={home.sections.quality_eyebrow}
+        title={home.sections.quality_title}
       >
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <Card className="overflow-hidden bg-gradient-to-br from-heading to-heading/90 p-10 text-white">
@@ -259,8 +264,8 @@ export default async function Home() {
       <Section 
         background="white"
         id="reviews" 
-        eyebrow="رأي الزبناء" 
-        title="الناس عجباتهم التجربة."
+        eyebrow={home.sections.reviews_eyebrow}
+        title={home.sections.reviews_title}
       >
         <div className="grid gap-6 lg:grid-cols-3">
           {testimonials.map((testimonial) => (
@@ -284,8 +289,9 @@ export default async function Home() {
       {/* FAQ */}
       <Section 
         background="gray"
-        eyebrow="أسئلة" 
-        title="واش بقا عندك شي سؤال؟"
+        id="faq"
+        eyebrow={home.sections.faq_eyebrow}
+        title={home.sections.faq_title}
       >
         <div className="mx-auto max-w-3xl divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card shadow-lg">
           {faqs.slice(0, 4).map((faq) => (
@@ -306,10 +312,10 @@ export default async function Home() {
       <Section background="white">
         <Card className="overflow-hidden bg-gradient-to-br from-accent to-accent-hover p-10 text-center text-white shadow-[0_20px_70px_rgba(5,150,105,0.3)] lg:p-16">
           <h2 className="mx-auto max-w-2xl text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">
-            بدا رحلتك نحو صحة أحسن اليوم.
+            {home.sections.cta_title}
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg leading-[1.75] text-white/90">
-            طلب دابا وخلّص فالدار. كنوصلو لجميع المدن المغربية.
+            {home.sections.cta_subtitle}
           </p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <ButtonLink
@@ -319,7 +325,7 @@ export default async function Home() {
               className="bg-white text-accent hover:bg-white/95"
             >
               <MessageCircle className="h-5 w-5" />
-              طلب عبر واتساب
+              {home.hero.cta_whatsapp}
             </ButtonLink>
             <ButtonLink 
               href={`/products/${product.slug}`} 

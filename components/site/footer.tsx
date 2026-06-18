@@ -2,53 +2,51 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { LayoutDashboard, Mail, MessageCircle, Phone } from "lucide-react";
 
-import { collections } from "@/lib/data/catalog";
-import { brand, policies } from "@/lib/data/content";
+import type { SiteChrome } from "@/lib/cms/site";
 
-export function Footer() {
+type FooterProps = {
+  footer: SiteChrome["footer"];
+};
+
+export function Footer({ footer }: FooterProps) {
   return (
     <footer className="border-t border-border bg-section-bg px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.6fr_1fr_1fr]">
         <div>
-          <Link
-            className="flex items-center gap-3.5"
-            href="/"
-          >
+          <Link className="flex items-center gap-3.5" href="/">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-heading">
-              <span className="text-2xl font-bold text-white">V</span>
+              <span className="text-2xl font-bold text-white">{footer.logoLetter}</span>
             </div>
             <span className="text-xl font-bold tracking-tight text-heading">
-              {brand.name}
+              {footer.brandName}
             </span>
           </Link>
           <p className="mt-6 max-w-sm text-[0.9375rem] leading-[1.75] text-body">
-            ميزان ذكي كيعاونك تعرف جسمك بزاف ديال التفاصيل. توصيل لجميع المدن وخلاص فالدار.
+            {footer.description}
           </p>
           <a
-            href="https://wa.me/212682217644"
+            href={footer.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-7 inline-flex items-center gap-2.5 rounded-xl bg-[#25D366] px-6 py-3.5 text-[0.9375rem] font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
           >
             <MessageCircle className="h-5 w-5" />
-            تواصل معانا فواتساب
+            {footer.whatsappCta}
           </a>
         </div>
 
-        <FooterColumn title="المتجر">
-          {collections.map((collection) => (
-            <Link key={collection.id} href={`/collections/${collection.slug}`}>
+        <FooterColumn title={footer.shopColumnTitle}>
+          {footer.collectionLinks.map((collection) => (
+            <Link key={collection.href} href={collection.href}>
               {collection.name}
             </Link>
           ))}
         </FooterColumn>
 
-        <FooterColumn title="مساعدة">
-          <Link href="/about">شكون حنا</Link>
-          <Link href="/contact">تواصل معانا</Link>
-          {policies.slice(0, 3).map((policy) => (
-            <Link key={policy.slug} href={`/help/${policy.slug}`}>
-              {policy.title}
+        <FooterColumn title={footer.helpColumnTitle}>
+          {footer.helpLinks.map((link) => (
+            <Link key={link.href} href={link.href}>
+              {link.label}
             </Link>
           ))}
         </FooterColumn>
@@ -58,15 +56,17 @@ export function Footer() {
         <div className="flex items-center gap-5">
           <p className="flex items-center gap-2" dir="ltr">
             <Phone className="h-4 w-4 text-accent" />
-            <span className="font-medium">{brand.whatsapp}</span>
+            <span className="font-medium">{footer.whatsappDisplay}</span>
           </p>
           <p className="flex items-center gap-2" dir="ltr">
             <Mail className="h-4 w-4 text-accent" />
-            <span className="font-medium">{brand.supportEmail}</span>
+            <span className="font-medium">{footer.supportEmail}</span>
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <p className="font-medium">© {new Date().getFullYear()} {brand.name}</p>
+          <p className="font-medium">
+            © {new Date().getFullYear()} {footer.brandName}
+          </p>
           <Link
             href="/admin"
             aria-label="لوحة التحكم"

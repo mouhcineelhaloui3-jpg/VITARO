@@ -4,19 +4,21 @@ import { ArrowRight, BookOpen } from "lucide-react";
 import { Section } from "@/components/layout/section";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { blogArticles } from "@/lib/data/content";
+import { getBlogArticles } from "@/lib/cms/site";
 
 export const metadata = {
-  title: "Health Journal",
-  description: "SEO-ready Vitaro articles about health, fitness, wellness, nutrition, and body analysis.",
+  title: "المدونة",
+  description: "مقالات صحية عن اللياقة، التغذية، وتحليل الجسم من فيتارو.",
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const blogArticles = await getBlogArticles();
+
   return (
     <Section
-      eyebrow="Health Journal"
-      title="SEO-ready content for wellness, fitness, nutrition, and body analysis."
-      description="The blog is prepared for CMS-managed editorial content, category pages, structured metadata, and internal product education."
+      eyebrow="المدونة"
+      title="مقالات صحية عن اللياقة، التغذية، وتحليل الجسم."
+      description="تحرير المقالات من لوحة التحكم → المحتوى والصفحات → المدونة."
     >
       <div className="grid gap-6 lg:grid-cols-3">
         {blogArticles.map((article) => (
@@ -30,11 +32,9 @@ export default function BlogPage() {
                 {article.readTime}
               </p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight">{article.title}</h2>
-              <p className="mt-3 leading-7 text-body">
-                {article.excerpt}
-              </p>
+              <p className="mt-3 leading-7 text-body">{article.excerpt}</p>
               <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold">
-                Read article
+                اقرأ المقال
                 <ArrowRight className="h-4 w-4 text-emerald-500" />
               </span>
             </Card>

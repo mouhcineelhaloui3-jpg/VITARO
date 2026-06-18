@@ -1,32 +1,36 @@
-import Image from "next/image";
 import Link from "next/link";
-import { Menu, MessageCircle, ShoppingBag } from "lucide-react";
+import { Menu, MessageCircle } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { CartDrawer } from "@/features/cart/cart-drawer";
-import { navigation } from "@/lib/data/content";
+import type { SiteChrome } from "@/lib/cms/site";
 
-export function Header() {
+type HeaderProps = {
+  header: SiteChrome["header"];
+  brandName: string;
+};
+
+export function Header({ header, brandName }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           className="flex shrink-0 items-center gap-2.5"
           href="/"
-          aria-label="فيتارو — الصفحة الرئيسية"
+          aria-label={`${brandName} — الصفحة الرئيسية`}
         >
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent">
-            <span className="text-xl font-bold text-white">V</span>
+            <span className="text-xl font-bold text-white">{header.logoLetter}</span>
           </div>
           <span className="text-[1.25rem] font-extrabold tracking-tight text-heading">
-            VITARO
+            {header.logoText}
           </span>
         </Link>
 
         <nav className="mr-4 hidden items-center gap-1 lg:flex" aria-label="القائمة الرئيسية">
-          {navigation.map((item) => (
+          {header.navigation.map((item) => (
             <Link
-              key={item.label}
+              key={`${item.label}-${item.href}`}
               className="inline-flex h-10 items-center rounded-xl px-4 text-[0.9375rem] font-medium text-body transition-all hover:bg-section-bg hover:text-heading"
               href={item.href}
             >
@@ -37,7 +41,7 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3">
           <a
-            href="https://wa.me/212682217644"
+            href={header.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="واتساب"
@@ -46,13 +50,13 @@ export function Header() {
             <MessageCircle className="h-5 w-5" />
           </a>
           <CartDrawer />
-          <ButtonLink 
-            className="hidden sm:inline-flex" 
-            href="/products/smart-digital-body-scale" 
-            variant="primary" 
+          <ButtonLink
+            className="hidden sm:inline-flex"
+            href={header.productHref}
+            variant="primary"
             size="sm"
           >
-            شري دابا
+            {header.ctaLabel}
           </ButtonLink>
           <button
             aria-label="القائمة"

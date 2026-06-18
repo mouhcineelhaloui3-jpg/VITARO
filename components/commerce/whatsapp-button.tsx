@@ -1,12 +1,20 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+
 import { trackEvent } from "@/lib/analytics";
 
-export function FloatingWhatsApp() {
+type FloatingWhatsAppProps = {
+  whatsappUrl: string;
+};
+
+export function FloatingWhatsApp({ whatsappUrl }: FloatingWhatsAppProps) {
   const handleClick = () => {
     trackEvent("whatsapp_click", { location: "floating_button" });
-    window.open("https://wa.me/212682217644?text=مرحباً، أريد الاستفسار عن ميزان فيتارو الذكي", "_blank");
+    window.open(
+      `${whatsappUrl}${whatsappUrl.includes("?") ? "&" : "?"}text=${encodeURIComponent("مرحباً، أريد الاستفسار عن ميزان فيتارو الذكي")}`,
+      "_blank",
+    );
   };
 
   return (
