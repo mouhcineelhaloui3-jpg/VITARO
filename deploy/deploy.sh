@@ -17,6 +17,9 @@ npx prisma db push
 echo "==> Building Next.js"
 npm run build
 
+echo "==> Verifying environment variables"
+bash deploy/check-env.sh
+
 echo "==> Restarting PM2 process"
 if pm2 describe vitaro > /dev/null 2>&1; then
   pm2 reload vitaro

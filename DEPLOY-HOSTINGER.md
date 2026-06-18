@@ -184,6 +184,7 @@ bash deploy/deploy.sh
 
 | المشكلة | الحل |
 |---|---|
+| **Server error — There is a problem with the server configuration** | هذا خطأ NextAuth. على الخادم: `cd /var/www/vitaro && bash deploy/check-env.sh` ثم تأكد أن `.env` يحتوي `NEXTAUTH_SECRET` (وليس فارغاً) و `NEXTAUTH_URL=https://نطاقك-الحقيقي.com` (ليس `localhost`). بعد التعديل: `pm2 delete vitaro && pm2 start ecosystem.config.js && pm2 save` |
 | 502 Bad Gateway | تحقق `pm2 status` و `pm2 logs vitaro`؛ تأكد أن التطبيق يعمل على المنفذ 3000 |
 | خطأ اتصال قاعدة البيانات | راجع `DATABASE_URL` و `sudo systemctl status postgresql` |
 | تسجيل دخول الأدمن لا يعمل | تأكد من ضبط `ADMIN_PASSWORD` و `NEXTAUTH_SECRET` في `.env` ثم `pm2 reload vitaro` |
@@ -196,6 +197,6 @@ bash deploy/deploy.sh
 
 - `ecosystem.config.js` — إعداد PM2.
 - `deploy/nginx.conf.example` — إعداد Nginx reverse proxy.
-- `deploy/deploy.sh` — سكربت التحديث التلقائي.
+- `deploy/check-env.sh` — التحقق من متغيّرات `.env` قبل التشغيل.
 - `.env.production.example` — قالب متغيّرات الإنتاج.
 - `next.config.ts` — مُفعّل عليه `output: "standalone"` للأداء.

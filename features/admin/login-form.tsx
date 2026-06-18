@@ -26,7 +26,11 @@ export function AdminLoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError("كلمة المرور غير صحيحة.");
+      if (result.error === "Configuration") {
+        setError("خطأ في إعداد الخادم: NEXTAUTH_SECRET أو NEXTAUTH_URL غير مضبوطين في ملف .env");
+      } else {
+        setError("كلمة المرور غير صحيحة.");
+      }
       return;
     }
 

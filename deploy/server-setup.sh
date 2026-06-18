@@ -98,6 +98,9 @@ npx prisma db push
 log "Building the app"
 npm run build
 
+log "Verifying environment variables"
+bash deploy/check-env.sh "$APP_DIR"
+
 log "Starting app with PM2"
 if pm2 describe vitaro > /dev/null 2>&1; then
   pm2 reload vitaro

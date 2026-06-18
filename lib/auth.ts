@@ -6,8 +6,26 @@ const credentialsSchema = z.object({
   password: z.string().min(8),
 });
 
+function resolveAuthSecret(): string | undefined {
+  const secret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
+
+  if (secret) {
+    return secret;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return "vitaro-dev-only-insecure-secret";
+  }
+
+  return undefined;
+}
+
+const authSecret = resolveAuthSecret();
+const authUrl = process.env.NEXTAUTH_URL ?? process.env.AUTH_URL;
+
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: authSecret,
+  useSecureCookies: authUrl?.startsWith("https://") ?? false,
   session: {
     strategy: "jwt",
     maxAge: 60 * 60 * 8,
