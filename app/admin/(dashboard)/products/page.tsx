@@ -84,9 +84,12 @@ export default function AdminProductsPage() {
       return;
     }
 
+    const payload = (await res.json().catch(() => null)) as { error?: string } | null;
     setFeedback({
       type: "error",
-      text: "تعذّر تجهيز قاعدة البيانات. تأكد من إعداد DATABASE_URL في Vercel.",
+      text:
+        payload?.error ??
+        "تعذّر تجهيز قاعدة البيانات. تأكد من إعداد DATABASE_URL في Vercel.",
     });
   }
 

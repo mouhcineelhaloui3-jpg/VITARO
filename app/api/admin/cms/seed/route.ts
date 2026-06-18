@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/auth-server";
+import { hasProductionDb, missingDbMessage } from "@/lib/cms/has-db";
 import { prisma } from "@/lib/prisma";
 import { products as staticProducts } from "@/lib/data/catalog";
 import {
@@ -21,6 +22,10 @@ import {
 export async function POST() {
   const session = await requireAdminSession();
   if (!session) return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+
+  if (!hasProductionDb()) {
+    return NextResponse.json({ error: missingDbMessage() }, { status: 503 });
+  }
 
   const results: Record<string, number> = {};
 

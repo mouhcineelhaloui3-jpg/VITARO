@@ -65,15 +65,20 @@ async function saveContentBlocks(blocks: { page: string; section: string; key: s
 function SeedBanner({ onDone }: { onDone: () => void }) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function runSeed() {
     setLoading(true);
+    setError(null);
     const res = await fetch("/api/admin/cms/seed", { method: "POST" });
     setLoading(false);
     if (res.ok) {
       setDone(true);
       onDone();
+      return;
     }
+    const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+    setError(payload?.error ?? "تعذّر التهيئة. أضف DATABASE_URL في Vercel ثم أعد النشر.");
   }
 
   if (done) return null;
@@ -87,6 +92,7 @@ function SeedBanner({ onDone }: { onDone: () => void }) {
         <p className="mt-0.5 text-sm text-emerald-700 dark:text-emerald-400">
           سيتم نقل المنتجات، التقييمات، الأسئلة، وإعدادات العلامة إلى قاعدة البيانات لتمكين التعديل الكامل.
         </p>
+        {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       </div>
       <button
         onClick={runSeed}
