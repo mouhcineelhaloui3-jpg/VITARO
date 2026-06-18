@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 44" fill="none">
+  <!-- Icon mark: emerald rounded square with V scale -->
+  <rect width="44" height="44" rx="11" fill="#059669"/>
+  <path d="M11 13.5L22 30.5L33 13.5" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="22" cy="32.5" r="2" fill="white" opacity="0.55"/>
+  <!-- Wordmark: VITARO -->
+  <text x="56" y="31" font-family="system-ui, -apple-system, Arial, sans-serif" font-weight="800" font-size="23" letter-spacing="2" fill="#0F172A">VITARO</text>
+</svg>
