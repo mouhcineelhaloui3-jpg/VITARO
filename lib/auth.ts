@@ -21,7 +21,10 @@ function resolveAuthSecret(): string | undefined {
 }
 
 const authSecret = resolveAuthSecret();
-const authUrl = process.env.NEXTAUTH_URL ?? process.env.AUTH_URL;
+const authUrl =
+  process.env.NEXTAUTH_URL ??
+  process.env.AUTH_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
 
 export const authOptions: NextAuthOptions = {
   secret: authSecret,
