@@ -15,9 +15,10 @@ import { products as catalogProducts } from "@/lib/data/catalog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { fetchJsonArray } from "@/lib/fetcher";
 import { useState } from "react";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) => fetchJsonArray<ProductRow>(url);
 
 type ProductRow = {
   id: string;
@@ -55,7 +56,7 @@ export default function AdminProductsPage() {
   }));
 
   // Add any DB-only products
-  if (dbProducts) {
+  if (Array.isArray(dbProducts)) {
     for (const dbP of dbProducts) {
       if (!displayProducts.find((p) => p.slug === dbP.slug)) {
         displayProducts.push(dbP);
