@@ -14,7 +14,13 @@ import {
 import type { Product, Collection } from "@/types/commerce";
 
 function hasDb(): boolean {
-  return !!process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL;
+  // SQLite file URLs only work locally — ignore them on serverless hosts.
+  return !!url && !url.startsWith("file:");
+}
+
+function asArray<T>(value: unknown, fallback: T[]): T[] {
+  return Array.isArray(value) ? value : fallback;
 }
 
 // ─── PRODUCTS ──────────────────────────────────────────────────────────────
@@ -187,7 +193,8 @@ function mapDbProduct(row: DbProduct): Product {
   let images: string[] = [];
   if (row.imagesJson) {
     try {
-      images = JSON.parse(row.imagesJson);
+      const parsed = JSON.parse(row.imagesJson);
+      images = asArray(parsed, []);
     } catch {}
   }
 
@@ -205,12 +212,12 @@ function mapDbProduct(row: DbProduct): Product {
     currency: row.currency as import("@/types/commerce").CurrencyCode,
     rating: row.rating ?? staticMatch?.rating ?? 0,
     reviewCount: row.reviewCount ?? staticMatch?.reviewCount ?? 0,
-    inventory: row.variants.reduce((s, v) => s + v.inventory, 0),
-    tags: row.tags ? row.tags.split(",").map((t) => t.trim()) : staticMatch?.tags ?? [],
+    inventory: (row.variants ?? []).reduce((s, v) => s + v.inventory, 0),
+    tags: row.tags ? row.tags.split(",").map((t) => t.trim()) : (staticMatch?.tags ?? []),
     images: images.length > 0 ? images : (staticMatch?.images ?? []),
     categoryId: staticMatch?.categoryId ?? "",
     collectionIds: staticMatch?.collectionIds ?? [],
-    variants: row.variants.map((v) => ({
+    variants: (row.variants ?? []).map((v) => ({
       id: v.id,
       name: v.name,
       sku: v.sku,
@@ -219,15 +226,17 @@ function mapDbProduct(row: DbProduct): Product {
       inventory: v.inventory,
       color: v.color ?? "#000000",
     })),
-    metrics: (metadata.metrics as Product["metrics"]) ?? staticMatch?.metrics ?? [],
-    features: (metadata.features as Product["features"]) ?? staticMatch?.features ?? [],
-    specifications:
-      (metadata.specifications as Product["specifications"]) ??
-      staticMatch?.specifications ??
-      [],
-    packageContents:
-      (metadata.packageContents as string[]) ?? staticMatch?.packageContents ?? [],
-    usageSteps: (metadata.usageSteps as string[]) ?? staticMatch?.usageSteps ?? [],
+    metrics: asArray(metadata.metrics, staticMatch?.metrics ?? []),
+    features: asArray(metadata.features, staticMatch?.features ?? []),
+    specifications: asArray(
+      metadata.specifications,
+      staticMatch?.specifications ?? [],
+    ),
+    packageContents: asArray(
+      metadata.packageContents,
+      staticMatch?.packageContents ?? [],
+    ),
+    usageSteps: asArray(metadata.usageSteps, staticMatch?.usageSteps ?? []),
     seo: (metadata.seo as Product["seo"]) ?? staticMatch?.seo,
   };
 }

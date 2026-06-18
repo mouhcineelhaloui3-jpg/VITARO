@@ -32,7 +32,7 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardDTO> {
     recentActivity: [],
   };
 
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith("file:")) {
     return empty;
   }
 

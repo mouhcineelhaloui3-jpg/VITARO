@@ -20,7 +20,7 @@ export function InstantSearch() {
     const normalized = query.toLowerCase();
 
     return products.filter((product) =>
-      [product.title, product.subtitle, product.description, ...product.tags]
+      [product.title, product.subtitle, product.description, ...(product.tags ?? [])]
         .join(" ")
         .toLowerCase()
         .includes(normalized),

@@ -38,6 +38,10 @@ export default async function Home() {
   ]);
   const product = allProducts[0];
 
+  if (!product) {
+    throw new Error("No products configured for the storefront.");
+  }
+
   const trustChips = [
     { icon: Truck, label: "توصيل لجميع المدن" },
     { icon: ShieldCheck, label: "خلّص فالدار (COD)" },

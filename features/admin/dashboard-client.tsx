@@ -236,7 +236,7 @@ export function DashboardClient() {
             </Badge>
           </div>
           <div className="flex h-48 items-end gap-2">
-            {stats.chart.map((height, index) => (
+            {(Array.isArray(stats.chart) ? stats.chart : []).map((height, index) => (
               <div
                 key={index}
                 className="flex-1 rounded-t-lg bg-emerald-100 transition-all dark:bg-emerald-500/10"
