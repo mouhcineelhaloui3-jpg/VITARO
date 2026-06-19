@@ -19,6 +19,7 @@ import {
 
 import { Section } from "@/components/layout/section";
 import { Reveal } from "@/components/motion/reveal";
+import { CompanionAppSection } from "@/components/commerce/companion-app-section";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, FeatureCard } from "@/components/ui/card";
@@ -184,6 +185,8 @@ export default async function Home() {
           ))}
         </div>
       </Section>
+
+      <CompanionAppSection />
 
       {/* METRICS */}
       <Section
