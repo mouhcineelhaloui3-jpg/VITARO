@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Lock, MessageCircle, ShieldCheck, Truck, WalletCards } from "lucide-react";
+import { Lock, MessageCircle, Truck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,9 +39,8 @@ export function CheckoutPanel({
     initialVariantId ?? product.variants[0]?.id ?? "",
   );
   const [quantity, setQuantity] = useState(initialQuantity);
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "CARD" | "WALLET">(
-    settings.codEnabled ? "COD" : settings.cardEnabled ? "CARD" : "WALLET",
-  );
+  const paymentMethod = "COD" as const;
+  const paymentLabel = "الدفع عند الاستلام";
   const [customerName, setCustomerName] = useState("");
   const [gender, setGender] = useState(GENDER_OPTIONS[0].value);
   const [phone, setPhone] = useState("");
@@ -65,19 +64,6 @@ export function CheckoutPanel({
     ? Math.round(subtotal * (settings.taxRate / 100) * 100) / 100
     : 0;
   const total = subtotal + shipping + tax;
-
-  const paymentMethods = [
-    { label: "الدفع عند الاستلام", icon: Truck, id: "COD" as const },
-    { label: "البطاقة البنكية", icon: WalletCards, id: "CARD" as const },
-    { label: "المحفظة الإلكترونية", icon: ShieldCheck, id: "WALLET" as const },
-  ].filter((method) => {
-    if (method.id === "COD") return settings.codEnabled;
-    if (method.id === "CARD") return settings.cardEnabled;
-    return settings.walletEnabled;
-  });
-
-  const paymentLabel =
-    paymentMethods.find((method) => method.id === paymentMethod)?.label ?? "الدفع عند الاستلام";
 
   function validateForm(): string | null {
     if (!phone.trim()) return "رقم الهاتف مطلوب";
@@ -279,28 +265,10 @@ export function CheckoutPanel({
             />
           </label>
 
-          {paymentMethods.length > 0 ? (
-            <>
-              <p className="mt-2 font-semibold text-heading">طريقة الدفع</p>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {paymentMethods.map((method) => (
-                  <button
-                    key={method.id}
-                    type="button"
-                    onClick={() => setPaymentMethod(method.id)}
-                    className={`rounded-3xl border p-4 text-right font-semibold transition ${
-                      paymentMethod === method.id
-                        ? "border-emerald-500 bg-emerald-50/50"
-                        : "border-zinc-200 bg-white"
-                    }`}
-                  >
-                    <method.icon className="mb-3 h-5 w-5 text-emerald-500" />
-                    {method.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : null}
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <Truck className="h-5 w-5 shrink-0 text-emerald-600" />
+            <span>الدفع عند الاستلام (COD) فقط</span>
+          </div>
 
           {error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

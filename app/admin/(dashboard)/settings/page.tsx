@@ -221,8 +221,6 @@ export default function AdminSettingsPage() {
             <p className="text-xs font-medium text-muted-fg">طرق الدفع المتاحة</p>
             {[
               { key: "codEnabled" as const, label: "الدفع عند الاستلام (COD)" },
-              { key: "cardEnabled" as const, label: "البطاقة البنكية" },
-              { key: "walletEnabled" as const, label: "المحفظة الإلكترونية" },
             ].map((method) => (
               <label key={method.key} className="flex items-center gap-2">
                 <input
