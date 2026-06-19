@@ -13,6 +13,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { VitaroLogo } from "@/components/brand/vitaro-logo";
 import { authOptions } from "@/lib/auth";
 import { AdminQuickActions } from "@/features/admin/quick-actions";
 
@@ -40,10 +41,10 @@ export default async function AdminDashboardLayout({
           className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-l border-surface bg-surface px-4 py-6 dark:border-white/10 dark:bg-[#111827] dark:[--surface-bg:#111827] dark:[--surface-fg-heading:#f8fafc] dark:[--surface-fg-body:#e2e8f0] dark:[--surface-fg-muted:#cbd5e1] dark:[--surface-fg-subtle:#94a3b8] dark:[--surface-icon:#f8fafc] dark:[--surface-border:rgba(255,255,255,0.1)] lg:flex"
         >
           <div className="mb-8 px-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-surface-subtle">
-              فيتارو
+            <VitaroLogo href="/admin" className="h-10" />
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-surface-subtle">
+              لوحة التحكم
             </p>
-            <h1 className="mt-1 text-lg font-semibold text-surface-heading">لوحة التحكم</h1>
           </div>
 
           <nav className="space-y-1">

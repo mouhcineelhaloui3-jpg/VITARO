@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { LayoutDashboard, Mail, MessageCircle, Phone } from "lucide-react";
 
+import { VitaroLogo } from "@/components/brand/vitaro-logo";
 import type { SiteChrome } from "@/lib/cms/site";
 
 type FooterProps = {
@@ -13,14 +14,7 @@ export function Footer({ footer }: FooterProps) {
     <footer className="border-t border-border bg-section-bg px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.6fr_1fr_1fr]">
         <div>
-          <Link className="flex items-center gap-3.5" href="/">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-heading">
-              <span className="text-2xl font-bold text-white">{footer.logoLetter}</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-heading">
-              {footer.brandName}
-            </span>
-          </Link>
+          <VitaroLogo />
           <p className="mt-6 max-w-sm text-[0.9375rem] leading-[1.75] text-body">
             {footer.description}
           </p>
