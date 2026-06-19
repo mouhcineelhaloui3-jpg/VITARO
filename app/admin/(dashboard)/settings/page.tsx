@@ -234,7 +234,7 @@ export default function AdminSettingsPage() {
           </div>
         </Card>
 
-        <Card className="space-y-4 p-5">
+        <Card className="space-y-4 p-5" id="pixels">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-emerald-600" />
             <h2 className="font-semibold text-heading">بكسل التتبع والتحليلات</h2>

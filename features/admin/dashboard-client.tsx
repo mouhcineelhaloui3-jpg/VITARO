@@ -1,112 +1,60 @@
 "use client";
 
 import useSWR from "swr";
+import Link from "next/link";
 import {
   Activity,
+  ArrowLeft,
   BarChart3,
   Bell,
-  Boxes,
   ClipboardList,
-  Database,
-  FileText,
-  ImageIcon,
-  LineChart,
-  Lock,
-  Megaphone,
-  MessageCircle,
-  Palette,
-  Settings,
-  Shield,
+  Package,
   ShoppingBag,
   TrendingUp,
   Users,
-  type LucideIcon,
-  Package,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { adminModules } from "@/lib/data/content";
+import {
+  adminControlAreas,
+  adminOperationCards,
+  moduleBadgeVariant,
+  resolveAdminModules,
+} from "@/lib/admin/module-registry";
+import { StorefrontSpacingPanel } from "@/features/admin/storefront-spacing-panel";
 import { formatCurrency } from "@/lib/utils";
 import type { AdminDashboardDTO } from "@/types/admin";
 import { useEffect, useState } from "react";
 
-const fetcher = (url: string) => fetch(url).then((res) => {
-  if (!res.ok) throw new Error("Network response was not ok");
-  return res.json();
-});
-
-const adminAreas = [
-  {
-    icon: Boxes,
-    title: "التجارة",
-    items: ["الطلبات", "العملاء", "المنتجات", "المجموعات", "المخزون", "الكوبونات"],
-  },
-  {
-    icon: LineChart,
-    title: "التحليلات",
-    items: ["الإيرادات", "التحويلات", "الزيارات", "مشاهدات المنتج", "طلبات الواتساب"],
-  },
-  {
-    icon: Megaphone,
-    title: "التسويق",
-    items: ["فيسبوك بكسل", "تيك توك بكسل", "جوجل أناليتيكس", "الكوبونات", "العروض"],
-  },
-  {
-    icon: FileText,
-    title: "المحتوى",
-    items: ["منشئ الصفحة الرئيسية", "المدونة", "SEO", "علامات الميتا", "السياسات"],
-  },
-  {
-    icon: Palette,
-    title: "المظهر",
-    items: ["ألوان العلامة", "الوضع الداكن", "القائمة", "الفوتر"],
-  },
-  {
-    icon: Shield,
-    title: "الأمان",
-    items: ["المستخدمين", "الصلاحيات", "سجلات المراجعة", "النسخ الاحتياطي"],
-  },
-];
-
-const operationCards = [
-  {
-    icon: ImageIcon,
-    title: "مكتبة الوسائط",
-    body: "الصور، الفيديوهات، أصول المعرض مع تحسينات الأداء.",
-  },
-  {
-    icon: Database,
-    title: "النسخ الاحتياطي",
-    body: "لقطات قواعد البيانات، التصدير، الاستيراد، وأدوات التراجع.",
-  },
-  {
-    icon: Lock,
-    title: "الصلاحيات",
-    body: "تحكم بالوصول مبني على الأدوار للملاك، المدراء، المحررين، والدعم.",
-  },
-];
+const fetcher = (url: string) =>
+  fetch(url).then((res) => {
+    if (!res.ok) throw new Error("Network response was not ok");
+    return res.json();
+  });
 
 function SkeletonCard() {
   return (
     <Card className="relative overflow-hidden p-5">
       <div className="flex items-start justify-between">
         <div className="w-full">
-          <div className="h-4 w-20 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></div>
-          <div className="mt-2 h-8 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></div>
-          <div className="mt-2 h-3 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800"></div>
+          <div className="h-4 w-20 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+          <div className="mt-2 h-8 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+          <div className="mt-2 h-3 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
         </div>
-        <div className="h-10 w-10 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-800"></div>
+        <div className="h-10 w-10 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-800" />
       </div>
     </Card>
   );
 }
 
 export function DashboardClient() {
-  const { data: stats, error, isLoading } = useSWR<AdminDashboardDTO>("/api/admin/analytics", fetcher, {
-    refreshInterval: 15000,
-  });
-  
+  const { data: stats, error, isLoading } = useSWR<AdminDashboardDTO>(
+    "/api/admin/analytics",
+    fetcher,
+    { refreshInterval: 15000 },
+  );
+
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -121,12 +69,9 @@ export function DashboardClient() {
     return (
       <div className="space-y-8">
         <section>
-          <h2 className="text-2xl font-semibold tracking-tight text-heading">
-            نظرة عامة
-          </h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-heading">نظرة عامة</h2>
           <p className="mt-1 text-sm text-muted-fg">جاري تحميل البيانات الحية...</p>
         </section>
-
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <SkeletonCard />
           <SkeletonCard />
@@ -141,9 +86,11 @@ export function DashboardClient() {
     return (
       <div className="space-y-8">
         <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-500/20 dark:bg-red-500/10">
-          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">حدث خطأ في تحميل البيانات</h3>
+          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
+            حدث خطأ في تحميل البيانات
+          </h3>
           <p className="mt-2 text-sm text-red-500 dark:text-red-300">
-            يرجى التأكد من تشغيل قاعدة البيانات (PostgreSQL أو SQLite) ومن إعداد DATABASE_URL بشكل صحيح في ملف .env.local
+            يرجى التأكد من تشغيل قاعدة البيانات ومن إعداد DATABASE_URL بشكل صحيح.
           </p>
         </div>
       </div>
@@ -151,6 +98,9 @@ export function DashboardClient() {
   }
 
   const isLive = stats.status === "live";
+  const modules = resolveAdminModules(stats, {
+    pixelsConfigured: stats.pixelsConfigured,
+  });
 
   const dashboardStats = [
     {
@@ -192,28 +142,19 @@ export function DashboardClient() {
       )}
 
       <section>
-        <h2 className="text-2xl font-semibold tracking-tight text-heading">
-          نظرة عامة
-        </h2>
-        <p className="mt-1 text-sm text-muted-fg">
-          مؤشرات الأداء والنشاط — بيانات حقيقية فقط.
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight text-heading">نظرة عامة</h2>
+        <p className="mt-1 text-sm text-muted-fg">مؤشرات الأداء والنشاط — بيانات حقيقية فقط.</p>
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {dashboardStats.map((stat) => (
-          <Card
-            key={stat.label}
-            className="relative overflow-hidden p-5 transition hover:-translate-y-0.5"
-          >
+          <Card key={stat.label} className="relative overflow-hidden p-5 transition hover:-translate-y-0.5">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-fg">
                   {stat.label}
                 </p>
-                <p className="mt-2 text-3xl font-bold tracking-tight text-heading">
-                  {stat.value}
-                </p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-heading">{stat.value}</p>
                 <p className={`mt-1 text-xs font-medium ${stat.color}`}>{stat.delta}</p>
               </div>
               <span className={`rounded-2xl bg-zinc-50 p-2.5 dark:bg-white/5 ${stat.color}`}>
@@ -265,9 +206,7 @@ export function DashboardClient() {
                 >
                   <div className="flex items-center gap-2">
                     <Bell className="h-3.5 w-3.5 text-emerald-500" />
-                    <span className="font-medium text-body">
-                      {event.label}
-                    </span>
+                    <span className="font-medium text-body">{event.label}</span>
                   </div>
                   <span className="text-xs text-subtle">{event.time}</span>
                 </div>
@@ -281,31 +220,60 @@ export function DashboardClient() {
         </Card>
       </div>
 
+      <StorefrontSpacingPanel />
+
       <div id="commerce">
-        <h2 className="mb-4 text-lg font-semibold text-heading">وحدات النظام</h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-heading">وحدات النظام</h2>
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+            <Activity className="h-3.5 w-3.5" />
+            اضغط على أي وحدة للفتح
+          </span>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {adminModules.map((module) => (
-            <Card
-              key={module.title}
-              className="group p-5 transition hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <Badge variant={module.status === "Ready" ? "success" : "neutral"}>
-                  {module.metric}
-                </Badge>
-                <Settings className="h-4 w-4 text-subtle transition group-hover:text-emerald-500" />
-              </div>
-              <h3 className="font-semibold text-heading">{module.title}</h3>
-              <p className="mt-1.5 text-sm leading-6 text-muted-fg">{module.description}</p>
-            </Card>
-          ))}
+          {modules.map((module) => {
+            const content = (
+              <>
+                <div className="mb-4 flex items-center justify-between">
+                  <Badge variant={moduleBadgeVariant(module.metric)}>{module.metric}</Badge>
+                  <module.icon className="h-4 w-4 text-subtle transition group-hover:text-emerald-500" />
+                </div>
+                <h3 className="font-semibold text-heading">{module.title}</h3>
+                <p className="mt-1.5 text-sm leading-6 text-muted-fg">{module.description}</p>
+                {module.active ? (
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700">
+                    فتح الوحدة
+                    <ArrowLeft className="h-4 w-4" />
+                  </span>
+                ) : (
+                  <span className="mt-4 inline-block text-xs font-medium text-subtle">قريباً</span>
+                )}
+              </>
+            );
+
+            if (!module.active) {
+              return (
+                <Card key={module.id} className="p-5 opacity-75">
+                  {content}
+                </Card>
+              );
+            }
+
+            return (
+              <Link key={module.id} href={module.href} className="group block">
+                <Card className="h-full p-5 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg">
+                  {content}
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
       <div>
         <h2 className="mb-4 text-lg font-semibold text-heading">أقسام التحكم</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {adminAreas.map((area) => (
+          {adminControlAreas.map((area) => (
             <Card key={area.title} className="p-5">
               <div className="mb-4 flex items-center gap-2.5">
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
@@ -314,14 +282,24 @@ export function DashboardClient() {
                 <h3 className="font-semibold text-heading">{area.title}</h3>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {area.items.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
-                  >
-                    {item}
-                  </span>
-                ))}
+                {area.items.map((item) =>
+                  item.active && item.href ? (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <span
+                      key={item.label}
+                      className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-400 dark:border-white/10 dark:bg-white/5"
+                    >
+                      {item.label}
+                    </span>
+                  ),
+                )}
               </div>
             </Card>
           ))}
@@ -329,15 +307,41 @@ export function DashboardClient() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {operationCards.map((item) => (
-          <Card key={item.title} className="p-5">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-zinc-100 text-zinc-600 dark:bg-white/10 dark:text-zinc-300">
-              <item.icon className="h-5 w-5" />
-            </span>
-            <h3 className="mt-4 font-semibold text-heading">{item.title}</h3>
-            <p className="mt-1.5 text-sm leading-6 text-muted-fg">{item.body}</p>
-          </Card>
-        ))}
+        {adminOperationCards.map((item) => {
+          const body = (
+            <>
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-zinc-100 text-zinc-600 dark:bg-white/10 dark:text-zinc-300">
+                <item.icon className="h-5 w-5" />
+              </span>
+              <h3 className="mt-4 font-semibold text-heading">{item.title}</h3>
+              <p className="mt-1.5 text-sm leading-6 text-muted-fg">{item.body}</p>
+              {"href" in item && item.active ? (
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700">
+                  فتح
+                  <ArrowLeft className="h-4 w-4" />
+                </span>
+              ) : (
+                <span className="mt-3 inline-block text-xs text-subtle">قريباً</span>
+              )}
+            </>
+          );
+
+          if ("href" in item && item.active && item.href) {
+            return (
+              <Link key={item.title} href={item.href} className="block">
+                <Card className="h-full p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+                  {body}
+                </Card>
+              </Link>
+            );
+          }
+
+          return (
+            <Card key={item.title} className="p-5 opacity-80">
+              {body}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

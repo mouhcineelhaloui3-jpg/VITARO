@@ -18,6 +18,7 @@ import {
   defaultHomeSections,
   defaultTrustChips,
 } from "@/lib/cms/defaults";
+import { DEFAULT_PAGE_SPACING } from "@/lib/cms/layout-spacing";
 import {
   defaultStoreSettings,
   storeSettingsToConfig,
@@ -99,6 +100,14 @@ export async function POST() {
       update: { value: JSON.stringify(navigation), group: "nav" },
       create: { key: "navigation", value: JSON.stringify(navigation), group: "nav" },
     });
+
+    for (const [key, value] of Object.entries(DEFAULT_PAGE_SPACING)) {
+      await prisma.siteConfig.upsert({
+        where: { key },
+        update: { value, group: "layout" },
+        create: { key, value, group: "layout" },
+      });
+    }
 
     // 2. Seed testimonials
     const existingTestimonials = await prisma.testimonial.count();

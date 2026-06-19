@@ -6,15 +6,18 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { companionApp } from "@/lib/data/companion-app";
 import { productPageCopy } from "@/lib/data/product-page-copy";
+import type { SectionSpacingPreset } from "@/lib/cms/layout-spacing";
+import { resolveSectionSpacing } from "@/lib/cms/layout-spacing";
 import type { Product } from "@/types/commerce";
 
 const appFeatureIcons = [BarChart3, Activity, Bluetooth, Smartphone, Users] as const;
 
 type ProductPageSectionsProps = {
   product: Product;
+  spacing?: SectionSpacingPreset | ReturnType<typeof resolveSectionSpacing>;
 };
 
-export function ProductPageSections({ product }: ProductPageSectionsProps) {
+export function ProductPageSections({ product, spacing }: ProductPageSectionsProps) {
   const specRows = product.specifications.flatMap((group) =>
     group.items.map((item) => ({ group: group.group, ...item })),
   );
@@ -22,6 +25,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
   return (
     <>
       <Section
+        spacing={spacing}
         eyebrow={productPageCopy.why.eyebrow}
         title={productPageCopy.why.title}
         className="bg-section-bg/50"
@@ -39,7 +43,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
         </div>
       </Section>
 
-      <Section eyebrow={productPageCopy.included.eyebrow} title={productPageCopy.included.title}>
+      <Section spacing={spacing} eyebrow={productPageCopy.included.eyebrow} title={productPageCopy.included.title}>
         <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-3">
           {productPageCopy.included.items.map((item) => (
             <div
@@ -64,6 +68,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
       </Section>
 
       <Section
+        spacing={spacing}
         eyebrow={productPageCopy.how.eyebrow}
         title={productPageCopy.how.title}
         className="bg-section-bg/50"
@@ -95,7 +100,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
         </div>
       </Section>
 
-      <Section eyebrow={productPageCopy.bia.eyebrow} title={productPageCopy.bia.title}>
+      <Section spacing={spacing} eyebrow={productPageCopy.bia.eyebrow} title={productPageCopy.bia.title}>
         <div className="mx-auto grid max-w-5xl items-center gap-8 overflow-hidden rounded-[2rem] border border-emerald-100/80 bg-gradient-to-br from-emerald-50/60 to-white shadow-[0_20px_60px_rgba(15,23,42,0.05)] lg:grid-cols-2">
           <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[420px]">
             <Image
@@ -113,6 +118,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
       </Section>
 
       <Section
+        spacing={spacing}
         eyebrow={productPageCopy.app.eyebrow}
         title={productPageCopy.app.title}
         className="bg-section-bg/50"
@@ -169,7 +175,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
         </div>
       </Section>
 
-      <Section eyebrow={productPageCopy.specs.eyebrow} title={productPageCopy.specs.title}>
+      <Section spacing={spacing} eyebrow={productPageCopy.specs.eyebrow} title={productPageCopy.specs.title}>
         <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-white/70 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-md">
           <table className="w-full text-sm">
             <thead>
@@ -196,6 +202,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
       </Section>
 
       <Section
+        spacing={spacing}
         eyebrow={productPageCopy.faq.eyebrow}
         title={productPageCopy.faq.title}
         className="bg-section-bg/50"
@@ -213,7 +220,7 @@ export function ProductPageSections({ product }: ProductPageSectionsProps) {
         </div>
       </Section>
 
-      <Section eyebrow={productPageCopy.reviews.eyebrow} title={productPageCopy.reviews.title}>
+      <Section spacing={spacing} eyebrow={productPageCopy.reviews.eyebrow} title={productPageCopy.reviews.title}>
         <div className="grid gap-5 lg:grid-cols-3">
           {productPageCopy.reviews.items.map((review) => (
             <Card

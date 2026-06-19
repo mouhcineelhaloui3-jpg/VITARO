@@ -5,13 +5,15 @@ import { Card, FeatureCard } from "@/components/ui/card";
 import { LocationMap } from "@/components/site/location-map";
 import { ContactForm } from "@/features/contact/contact-form";
 import { brand, faqs } from "@/lib/data/content";
+import { getPageSpacing } from "@/lib/cms/site";
 
 export const metadata = {
   title: "اتصل بنا",
   description: "تواصل مع فريق دعم فيتارو عبر النموذج، أو واتساب، أو البريد الإلكتروني.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const spacing = await getPageSpacing("contact");
   const contactMethods: { icon: LucideIcon; label: string; value: string }[] = [
     { icon: MessageCircle, label: "واتساب", value: brand.whatsapp },
     { icon: Mail, label: "البريد الإلكتروني", value: brand.supportEmail },
@@ -23,6 +25,7 @@ export default function ContactPage() {
     <>
       <Section
         background="white"
+        spacing={spacing}
         eyebrow="اتصل بنا"
         title="دعم ممتاز للمنتجات والشحن والضمان."
         description="نحن هنا لمساعدتك. تواصل معنا وسنرد عليك في أقرب وقت."
@@ -53,6 +56,7 @@ export default function ContactPage() {
 
       <Section 
         background="gray"
+        spacing={spacing}
         eyebrow="الأسئلة الشائعة" 
         title="إجابات سريعة للدعم."
       >
@@ -70,6 +74,7 @@ export default function ContactPage() {
 
       <Section
         background="white"
+        spacing={spacing}
         eyebrow="الموقع"
         title="نحن في بني ملال."
         description="اعثر علينا في بني ملال، المغرب — أو افتح الخريطة مباشرة في خرائط جوجل."

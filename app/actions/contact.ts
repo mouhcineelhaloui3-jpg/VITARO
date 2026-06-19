@@ -1,32 +1,37 @@
 "use server";
 
-import { z } from "zod";
-
-const contactSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  topic: z.string().min(2),
-  message: z.string().min(10),
-});
+import {
+  contactFieldErrors,
+  contactSchema,
+  type ContactFormValues,
+} from "@/lib/validation/contact";
 
 export type ContactState = {
   ok: boolean;
   message: string;
 };
 
-export async function submitContactForm(values: unknown): Promise<ContactState> {
+export async function submitContactForm(values: ContactFormValues): Promise<ContactState> {
   const parsed = contactSchema.safeParse(values);
 
   if (!parsed.success) {
+    const fields = contactFieldErrors(parsed.error);
+    const firstMessage =
+      fields.name ??
+      fields.phone ??
+      fields.email ??
+      fields.topic ??
+      fields.message ??
+      "يرجى مراجعة الحقول المطلوبة.";
+
     return {
       ok: false,
-      message: "Please complete all fields with valid information.",
+      message: firstMessage,
     };
   }
 
   return {
     ok: true,
-    message:
-      "Thanks. The support workflow is ready for CRM, email, and WhatsApp integration.",
+    message: "شكراً لك. فريقنا سيتواصل معك قريباً.",
   };
 }

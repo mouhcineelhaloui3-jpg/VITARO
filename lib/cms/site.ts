@@ -11,6 +11,11 @@ import {
   defaultTrustChips,
   type NavItem,
 } from "@/lib/cms/defaults";
+import {
+  DEFAULT_PAGE_SPACING,
+  pageSpacingConfigKey,
+  resolveSectionSpacing,
+} from "@/lib/cms/layout-spacing";
 import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
 import { getBrand, getCollections, getProducts, type BrandSettings } from "@/lib/cms/db";
 import { cmsNoStore } from "@/lib/cms/runtime";
@@ -229,6 +234,14 @@ export async function getBlogArticles(): Promise<BlogArticle[]> {
 export async function getBlogArticleBySlug(slug: string): Promise<BlogArticle | undefined> {
   const articles = await getBlogArticles();
   return articles.find((article) => article.slug === slug);
+}
+
+export async function getPageSpacing(page: string) {
+  cmsNoStore();
+  const configKey = pageSpacingConfigKey(page);
+  const layoutMap = await getConfigMap("layout");
+  const preset = layoutMap[configKey] ?? layoutMap["spacing.default"] ?? DEFAULT_PAGE_SPACING[configKey];
+  return resolveSectionSpacing(preset);
 }
 
 export async function getNavigation(): Promise<NavItem[]> {

@@ -14,4 +14,5 @@ export type AdminDashboardDTO = {
     label: string;
     time: string;
   }[];
+  pixelsConfigured?: boolean;
 };

@@ -6,19 +6,24 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { companionApp } from "@/lib/data/companion-app";
+import type { SectionSpacingPreset } from "@/lib/cms/layout-spacing";
+import { resolveSectionSpacing } from "@/lib/cms/layout-spacing";
 
 type CompanionAppSectionProps = {
   showImage?: boolean;
   className?: string;
+  spacing?: SectionSpacingPreset | ReturnType<typeof resolveSectionSpacing>;
 };
 
 export function CompanionAppSection({
   showImage = true,
   className = "",
+  spacing,
 }: CompanionAppSectionProps) {
   return (
     <Section
-      background="white"
+      background="gray"
+      spacing={spacing}
       eyebrow={companionApp.eyebrow}
       title={companionApp.title}
       description={companionApp.description}

@@ -5,6 +5,7 @@ import { PremiumBuyBox } from "@/features/products/premium-buy-box";
 import { PremiumProductGallery } from "@/features/products/premium-product-gallery";
 import { ProductPageSections } from "@/features/products/product-page-sections";
 import { getProductBySlug, getProducts, getBrand } from "@/lib/cms/db";
+import { getPageSpacing } from "@/lib/cms/site";
 import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const brand = await getBrand();
+  const [brand, spacing] = await Promise.all([getBrand(), getPageSpacing("product")]);
   const whatsappUrl = buildWhatsAppUrl(
     brand.whatsapp,
     `سلام، بغيت نطلب ${product.title} بثمن ${product.price} درهم`,
@@ -55,7 +56,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </section>
 
-      <ProductPageSections product={product} />
+      <ProductPageSections product={product} spacing={spacing} />
 
       <div className="h-20 lg:hidden" aria-hidden />
     </>

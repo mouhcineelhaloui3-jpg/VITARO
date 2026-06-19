@@ -2,7 +2,6 @@ import Image from "next/image";
 import {
   Activity,
   ArrowLeft,
-  BadgeCheck,
   BarChart3,
   Bone,
   CheckCircle2,
@@ -11,7 +10,6 @@ import {
   Gauge,
   MessageCircle,
   ShieldCheck,
-  Smartphone,
   Star,
   Truck,
   Wallet,
@@ -19,12 +17,13 @@ import {
 
 import { Section } from "@/components/layout/section";
 import { Reveal } from "@/components/motion/reveal";
-import { CompanionAppSection } from "@/components/commerce/companion-app-section";
+import { HomeBiaBanner } from "@/components/commerce/home-bia-banner";
 import { ScaleUsageGuide } from "@/components/commerce/scale-usage-guide";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, FeatureCard } from "@/components/ui/card";
 import { getProducts, getBrand } from "@/lib/cms/db";
+import { getPageSpacing } from "@/lib/cms/site";
 import { homeCopy } from "@/lib/data/home-copy";
 import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
 import { formatCurrency } from "@/lib/utils";
@@ -43,7 +42,11 @@ const offeringIcons = {
 const trustIcons = [Truck, Wallet, ShieldCheck] as const;
 
 export default async function Home() {
-  const [allProducts, brand] = await Promise.all([getProducts(), getBrand()]);
+  const [allProducts, brand, spacing] = await Promise.all([
+    getProducts(),
+    getBrand(),
+    getPageSpacing("home"),
+  ]);
   const product = allProducts[0];
 
   if (!product) {
@@ -125,8 +128,11 @@ export default async function Home() {
         </div>
       </section>
 
+      <HomeBiaBanner />
+
       <Section
         background="white"
+        spacing={spacing}
         eyebrow={homeCopy.offerings.eyebrow}
         title={homeCopy.offerings.title}
       >
@@ -145,7 +151,7 @@ export default async function Home() {
         </div>
       </Section>
 
-      <Section background="gray" id="how" eyebrow={homeCopy.how.eyebrow} title={homeCopy.how.title}>
+      <Section background="gray" id="how" spacing={spacing} eyebrow={homeCopy.how.eyebrow} title={homeCopy.how.title}>
         <div className="grid gap-6 md:grid-cols-3">
           {homeCopy.how.steps.map((step, index) => (
             <Card key={step.title}>
@@ -157,7 +163,7 @@ export default async function Home() {
         </div>
       </Section>
 
-      <Section background="white" eyebrow={homeCopy.why.eyebrow} title={homeCopy.why.title}>
+      <Section background="white" spacing={spacing} eyebrow={homeCopy.why.eyebrow} title={homeCopy.why.title}>
         <Card className="mx-auto max-w-3xl p-8">
           <ul className="grid gap-4 sm:grid-cols-2">
             {homeCopy.why.items.map((item) => (
@@ -170,29 +176,9 @@ export default async function Home() {
         </Card>
       </Section>
 
-      <Section background="gray" eyebrow={homeCopy.app.eyebrow} title={homeCopy.app.title}>
-        <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {homeCopy.app.items.map((item) => (
-            <Card key={item} className="p-5 text-center">
-              <Smartphone className="mx-auto h-6 w-6 text-emerald-600" />
-              <p className="mt-3 font-semibold text-heading">{item}</p>
-            </Card>
-          ))}
-        </div>
-      </Section>
+      <ScaleUsageGuide whatsappUrl={whatsappOrderLink} spacing={spacing} />
 
-      <CompanionAppSection />
-
-      <Section background="white" eyebrow={homeCopy.safety.eyebrow} title={homeCopy.safety.title}>
-        <Card className="mx-auto max-w-3xl border-emerald-100 bg-gradient-to-br from-emerald-50/80 to-white p-8 text-center sm:p-10">
-          <BadgeCheck className="mx-auto h-10 w-10 text-emerald-600" />
-          <p className="mt-5 text-lg leading-8 text-body sm:text-xl">{homeCopy.safety.body}</p>
-        </Card>
-      </Section>
-
-      <ScaleUsageGuide whatsappUrl={whatsappOrderLink} />
-
-      <Section background="gray" id="reviews" eyebrow={homeCopy.reviews.eyebrow} title={homeCopy.reviews.title}>
+      <Section background="gray" id="reviews" spacing={spacing} eyebrow={homeCopy.reviews.eyebrow} title={homeCopy.reviews.title}>
         <div className="grid gap-6 lg:grid-cols-3">
           {homeCopy.reviews.items.map((review, index) => (
             <Card key={review.quote} className="relative">
@@ -208,7 +194,7 @@ export default async function Home() {
         </div>
       </Section>
 
-      <Section background="white" id="faq" eyebrow={homeCopy.faq.eyebrow} title={homeCopy.faq.title}>
+      <Section background="white" id="faq" spacing={spacing} eyebrow={homeCopy.faq.eyebrow} title={homeCopy.faq.title}>
         <div className="mx-auto max-w-3xl divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card shadow-lg">
           {homeCopy.faq.items.map((faq) => (
             <details key={faq.question} className="group p-7">
@@ -224,7 +210,7 @@ export default async function Home() {
         </div>
       </Section>
 
-      <Section background="gray">
+      <Section background="gray" spacing={spacing}>
         <Card className="overflow-hidden bg-gradient-to-br from-accent to-accent-hover p-10 text-center text-white shadow-[0_20px_70px_rgba(5,150,105,0.3)] lg:p-16">
           <h2 className="mx-auto max-w-2xl text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">
             {homeCopy.finalCta.title}

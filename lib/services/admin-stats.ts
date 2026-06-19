@@ -39,7 +39,7 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardDTO> {
   try {
     const { prisma } = await import("@/lib/prisma");
 
-    const [orders, revenueResult, whatsappLeads, productViews, recentEvents, users, products] =
+    const [orders, revenueResult, whatsappLeads, productViews, recentEvents, users, products, storeConfigs] =
       await Promise.all([
         prisma.order.count(),
         prisma.order.aggregate({ _sum: { total: true }, where: { status: "PAID" } }),
@@ -52,7 +52,15 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardDTO> {
         }),
         prisma.user.count(),
         prisma.product.count(),
+        prisma.siteConfig.findMany({ where: { group: "store" } }),
       ]);
+
+    const storeMap = Object.fromEntries(storeConfigs.map((row) => [row.key, row.value]));
+    const pixelsConfigured = Boolean(
+      storeMap.metaPixelId?.trim() ||
+        storeMap.tiktokPixelId?.trim() ||
+        storeMap.gaMeasurementId?.trim(),
+    );
 
     const revenue = revenueResult._sum.total ? Number(revenueResult._sum.total) : 0;
     const conversionRate =
@@ -79,6 +87,7 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardDTO> {
           minute: "2-digit",
         }),
       })),
+      pixelsConfigured,
     };
   } catch {
     return empty;

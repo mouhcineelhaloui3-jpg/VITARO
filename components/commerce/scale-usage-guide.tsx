@@ -15,16 +15,20 @@ import { Section } from "@/components/layout/section";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { scaleUsageGuide } from "@/lib/data/scale-usage-guide";
+import type { SectionSpacingPreset } from "@/lib/cms/layout-spacing";
+import { resolveSectionSpacing } from "@/lib/cms/layout-spacing";
 
 type ScaleUsageGuideProps = {
   whatsappUrl?: string;
+  spacing?: SectionSpacingPreset | ReturnType<typeof resolveSectionSpacing>;
 };
 
-export function ScaleUsageGuide({ whatsappUrl }: ScaleUsageGuideProps) {
+export function ScaleUsageGuide({ whatsappUrl, spacing }: ScaleUsageGuideProps) {
   return (
     <Section
       id="usage-guide"
       background="white"
+      spacing={spacing}
       eyebrow={scaleUsageGuide.eyebrow}
       title={scaleUsageGuide.title}
       description={scaleUsageGuide.description}

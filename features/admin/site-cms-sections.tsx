@@ -14,6 +14,12 @@ import {
   defaultTrustChips,
 } from "@/lib/cms/defaults";
 import type { NavItem } from "@/lib/cms/defaults";
+import {
+  DEFAULT_PAGE_SPACING,
+  PAGE_SPACING_KEYS,
+  SECTION_SPACING_PRESETS,
+  type SectionSpacingPreset,
+} from "@/lib/cms/layout-spacing";
 
 const fetcher = (url: string) => fetch(url).then((r) => (r.ok ? r.json() : []));
 
@@ -410,6 +416,74 @@ export function HomeSectionsPanel({
               )
             }
           />
+        ))}
+      </div>
+      <SaveBar saving={saving} saved={saved} onSave={handleSave} />
+    </div>
+  );
+}
+
+export function LayoutSpacingSection({
+  configs,
+}: {
+  configs: { key: string; value: string }[];
+}) {
+  const current = (key: string) =>
+    (configs.find((c) => c.key === key)?.value as SectionSpacingPreset | undefined) ??
+    DEFAULT_PAGE_SPACING[key] ??
+    "normal";
+
+  const [values, setValues] = useState<Record<string, SectionSpacingPreset>>(
+    Object.fromEntries(
+      PAGE_SPACING_KEYS.map((page) => [page.key, current(page.key)]),
+    ),
+  );
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    const ok = await saveSettings(
+      PAGE_SPACING_KEYS.map((page) => ({
+        key: page.key,
+        value: values[page.key] ?? "normal",
+        group: "layout",
+      })),
+    );
+    setSaving(false);
+    if (ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      await mutate("/api/admin/cms/settings");
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm leading-7 text-body">
+        تحكم فالمسافة بين الأقسام لكل صفحة. جرّب &quot;مضغوط&quot; باش تقلّص الفراغ الكبير بين الأقسام.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {PAGE_SPACING_KEYS.map((page) => (
+          <label key={page.key} className="block space-y-1.5">
+            <span className="text-xs font-medium text-muted-fg">{page.label}</span>
+            <select
+              className="form-input"
+              value={values[page.key]}
+              onChange={(e) =>
+                setValues((current) => ({
+                  ...current,
+                  [page.key]: e.target.value as SectionSpacingPreset,
+                }))
+              }
+            >
+              {Object.entries(SECTION_SPACING_PRESETS).map(([key, preset]) => (
+                <option key={key} value={key}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+          </label>
         ))}
       </div>
       <SaveBar saving={saving} saved={saved} onSave={handleSave} />

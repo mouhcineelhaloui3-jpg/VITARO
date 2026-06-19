@@ -1,20 +1,15 @@
 "use client";
 
 import { useState, useTransition, type ReactNode } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { submitContactForm, type ContactState } from "@/app/actions/contact";
 import { Button } from "@/components/ui/button";
-
-const contactSchema = z.object({
-  name: z.string().min(2, "أدخل اسمك الكامل"),
-  email: z.string().email("أدخل بريد إلكتروني صحيح"),
-  topic: z.string().min(2, "اختر موضوعاً"),
-  message: z.string().min(10, "أخبرنا كيف يمكننا مساعدتك"),
-});
-
-type ContactFormValues = z.infer<typeof contactSchema>;
+import {
+  contactSchema,
+  type ContactFormValues,
+} from "@/lib/validation/contact";
 
 export function ContactForm() {
   const [state, setState] = useState<ContactState | null>(null);
@@ -22,41 +17,68 @@ export function ContactForm() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
     defaultValues: {
+      name: "",
+      phone: "",
+      email: "",
       topic: "استفسار عن المنتج",
+      message: "",
     },
   });
 
   function onSubmit(values: ContactFormValues) {
-    const parsed = contactSchema.safeParse(values);
-
-    if (!parsed.success) {
-      setState({ ok: false, message: "يرجى مراجعة الحقول المطلوبة." });
-      return;
-    }
-
+    setState(null);
     startTransition(async () => {
-      setState(await submitContactForm(parsed.data));
+      const result = await submitContactForm(values);
+      setState(result);
+      if (result.ok) {
+        reset({
+          name: "",
+          phone: "",
+          email: "",
+          topic: "استفسار عن المنتج",
+          message: "",
+        });
+      }
     });
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
       <Field label="الاسم" error={errors.name?.message}>
-        <input {...register("name")} className="form-input" placeholder="اسمك الكريم" />
+        <input {...register("name")} className="form-input" placeholder="اسمك الكريم" autoComplete="name" />
       </Field>
-      <Field label="البريد الإلكتروني" error={errors.email?.message}>
-        <input {...register("email")} className="form-input text-right" placeholder="you@example.com" type="email" dir="ltr" />
+      <Field label="الهاتف" error={errors.phone?.message}>
+        <input
+          {...register("phone")}
+          className="form-input text-right"
+          placeholder="06XXXXXXXX"
+          type="tel"
+          dir="ltr"
+          autoComplete="tel"
+        />
+      </Field>
+      <Field label="البريد الإلكتروني (اختياري)" error={errors.email?.message}>
+        <input
+          {...register("email")}
+          className="form-input text-right"
+          placeholder="you@example.com"
+          type="email"
+          dir="ltr"
+          autoComplete="email"
+        />
       </Field>
       <Field label="الموضوع" error={errors.topic?.message}>
         <select {...register("topic")} className="form-input">
-          <option>استفسار عن المنتج</option>
-          <option>الشحن</option>
-          <option>الإرجاع</option>
-          <option>الضمان</option>
-          <option>شراكة</option>
+          <option value="استفسار عن المنتج">استفسار عن المنتج</option>
+          <option value="الشحن">الشحن</option>
+          <option value="الإرجاع">الإرجاع</option>
+          <option value="الضمان">الضمان</option>
+          <option value="شراكة">شراكة</option>
         </select>
       </Field>
       <Field label="الرسالة" error={errors.message?.message}>
@@ -68,7 +90,7 @@ export function ContactForm() {
       </Field>
       {state && (
         <p className={state.ok ? "text-sm text-emerald-600" : "text-sm text-red-600"}>
-          {state.ok ? "شكراً لك. فريقنا سيتواصل معك قريباً." : state.message}
+          {state.message}
         </p>
       )}
       <Button disabled={isPending} size="lg" type="submit">
@@ -89,9 +111,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-semibold text-heading">
-        {label}
-      </span>
+      <span className="mb-2 block text-sm font-semibold text-heading">{label}</span>
       {children}
       {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
     </label>

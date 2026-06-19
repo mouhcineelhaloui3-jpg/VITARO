@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import {
   Check,
@@ -22,6 +22,7 @@ import {
   PanelBottom,
   BookOpen,
   Megaphone,
+  Rows3,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { brand as staticBrand, faqs as staticFaqs, testimonials as staticTestimonials } from "@/lib/data/content";
@@ -31,6 +32,7 @@ import {
   FooterSection,
   HeaderSection,
   HomeSectionsPanel,
+  LayoutSpacingSection,
   NavigationSection,
 } from "@/features/admin/site-cms-sections";
 
@@ -432,6 +434,7 @@ const SECTIONS = [
   { key: "announcement", label: "شريط الإعلانات", icon: Megaphone, route: "/" },
   { key: "hero", label: "الصفحة الرئيسية (Hero)", icon: Home, route: "/" },
   { key: "home-sections", label: "أقسام الصفحة الرئيسية", icon: Package, route: "/" },
+  { key: "layout-spacing", label: "تباعد الأقسام (كل الصفحات)", icon: Rows3, route: "/" },
   { key: "footer", label: "الفوتر", icon: PanelBottom, route: "/" },
   { key: "blog", label: "المدونة", icon: BookOpen, route: "/blog" },
   { key: "testimonials", label: "تقييمات الزبناء", icon: Star, route: "/#reviews" },
@@ -443,6 +446,13 @@ export default function AdminContentPage() {
   const { data: contentBlocks = [] } = useSWR("/api/admin/cms/content", fetcher);
   const [open, setOpen] = useState<string>("settings");
   const [seeded, setSeeded] = useState(false);
+
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("open");
+    if (requested && SECTIONS.some((section) => section.key === requested)) {
+      setOpen(requested);
+    }
+  }, []);
 
   const handleSeedDone = useCallback(() => {
     setSeeded(true);
@@ -457,6 +467,7 @@ export default function AdminContentPage() {
   const headerConfigs = configs.filter((c) => c.group === "header");
   const footerConfigs = configs.filter((c) => c.group === "footer");
   const navConfigs = configs.filter((c) => c.group === "nav");
+  const layoutConfigs = configs.filter((c) => c.group === "layout");
 
   return (
     <div className="space-y-6">
@@ -500,6 +511,7 @@ export default function AdminContentPage() {
                   {section.key === "announcement" && <AnnouncementSection blocks={contentBlocks} />}
                   {section.key === "hero" && <HeroSection blocks={contentBlocks} />}
                   {section.key === "home-sections" && <HomeSectionsPanel blocks={contentBlocks} />}
+                  {section.key === "layout-spacing" && <LayoutSpacingSection configs={layoutConfigs} />}
                   {section.key === "footer" && <FooterSection configs={footerConfigs} />}
                   {section.key === "blog" && <BlogSection />}
                   {section.key === "testimonials" && <TestimonialsSection />}

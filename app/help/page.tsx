@@ -4,15 +4,19 @@ import { ArrowRight, Search } from "lucide-react";
 import { Section } from "@/components/layout/section";
 import { Card } from "@/components/ui/card";
 import { policies } from "@/lib/data/content";
+import { getPageSpacing } from "@/lib/cms/site";
 
 export const metadata = {
   title: "Help Center",
   description: "Shipping, returns, warranty, privacy, terms, and support resources for Vitaro.",
 };
 
-export default function HelpCenterPage() {
+export default async function HelpCenterPage() {
+  const spacing = await getPageSpacing("help");
+
   return (
     <Section
+      spacing={spacing}
       eyebrow="Help Center"
       title="Support designed like a premium SaaS product."
       description="Shipping, returns, refunds, warranty, tracking, privacy, and terms pages are ready to become CMS-managed help content."
