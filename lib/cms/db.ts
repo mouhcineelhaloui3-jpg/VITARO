@@ -12,6 +12,7 @@ import {
   navigation as staticNav,
 } from "@/lib/data/content";
 import type { Product, Collection } from "@/types/commerce";
+import { cmsNoStore } from "@/lib/cms/runtime";
 
 function hasDb(): boolean {
   const url = process.env.DATABASE_URL;
@@ -26,6 +27,7 @@ function asArray<T>(value: unknown, fallback: T[]): T[] {
 // ─── PRODUCTS ──────────────────────────────────────────────────────────────
 
 export async function getProducts(): Promise<Product[]> {
+  cmsNoStore();
   if (!hasDb()) return staticProducts;
   try {
     const { prisma } = await import("@/lib/prisma");
@@ -41,6 +43,7 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  cmsNoStore();
   if (!hasDb()) return staticProducts.find((p) => p.slug === slug);
   try {
     const { prisma } = await import("@/lib/prisma");
@@ -56,6 +59,7 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 }
 
 export async function getCollections(): Promise<Collection[]> {
+  cmsNoStore();
   if (!hasDb()) return staticCollections;
 
   try {
@@ -100,6 +104,7 @@ export async function getProductsForCollection(collectionSlug: string): Promise<
 export type BrandSettings = typeof staticBrand;
 
 export async function getBrand(): Promise<BrandSettings> {
+  cmsNoStore();
   if (!hasDb()) return staticBrand;
   try {
     const { prisma } = await import("@/lib/prisma");
@@ -132,6 +137,7 @@ export async function getNavigation() {
 export type Testimonial = { name: string; role: string; quote: string; rating: number };
 
 export async function getTestimonials(): Promise<Testimonial[]> {
+  cmsNoStore();
   if (!hasDb()) return staticTestimonials;
   try {
     const { prisma } = await import("@/lib/prisma");
@@ -156,6 +162,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 export type FaqItem = { question: string; answer: string };
 
 export async function getFaqs(): Promise<FaqItem[]> {
+  cmsNoStore();
   if (!hasDb()) return staticFaqs;
   try {
     const { prisma } = await import("@/lib/prisma");
@@ -263,7 +270,10 @@ function mapDbProduct(row: DbProduct): Product {
       name: v.name,
       sku: v.sku,
       price: v.price.toNumber(),
-      compareAtPrice: staticMatch?.variants?.[0]?.compareAtPrice,
+      compareAtPrice:
+        row.compareAtPrice?.toNumber() ??
+        staticMatch?.variants?.find((variant) => variant.sku === v.sku)?.compareAtPrice ??
+        staticMatch?.compareAtPrice,
       inventory: v.inventory,
       color: v.color ?? "#000000",
     })),

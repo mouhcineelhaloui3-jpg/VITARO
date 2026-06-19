@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getBlogArticles } from "@/lib/cms/site";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "المدونة",
   description: "مقالات صحية عن اللياقة، التغذية، وتحليل الجسم من فيتارو.",

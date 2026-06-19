@@ -12,6 +12,8 @@ import {
   getProductsForCollection,
 } from "@/lib/cms/db";
 
+export const dynamic = "force-dynamic";
+
 type CollectionPageProps = {
   params: Promise<{ slug: string }>;
 };

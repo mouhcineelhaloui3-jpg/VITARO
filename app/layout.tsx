@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 
 import { StorefrontChrome } from "@/components/layout/storefront-chrome";
+import { TrackingPixels } from "@/components/analytics/tracking-pixels";
 import { getBrand } from "@/lib/cms/db";
+import { getStoreSettings } from "@/lib/cms/store-settings";
 
 import "./globals.css";
 
@@ -44,17 +46,22 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const storeSettings = await getStoreSettings();
+
   return (
     <html
-      lang="ar"
+      lang={storeSettings.locale}
       dir="rtl"
       className={`${cairo.variable} h-full scroll-smooth antialiased`}
     >
+      <head>
+        <TrackingPixels settings={storeSettings} />
+      </head>
       <body className="flex min-h-full flex-col bg-background text-body selection:bg-accent-light">
         <StorefrontChrome>{children}</StorefrontChrome>
       </body>

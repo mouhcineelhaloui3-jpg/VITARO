@@ -12,7 +12,8 @@ import {
   type NavItem,
 } from "@/lib/cms/defaults";
 import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
-import { getBrand, getCollections, type BrandSettings } from "@/lib/cms/db";
+import { getBrand, getCollections, getProducts, type BrandSettings } from "@/lib/cms/db";
+import { cmsNoStore } from "@/lib/cms/runtime";
 
 function hasDb(): boolean {
   const url = process.env.DATABASE_URL;
@@ -56,6 +57,13 @@ async function getContentMap(page: string): Promise<Record<string, string>> {
 
 export type SiteChrome = {
   brand: BrandSettings;
+  featuredProduct: {
+    title: string;
+    slug: string;
+    price: number;
+    currency: string;
+    images: string[];
+  } | null;
   header: {
     logoLetter: string;
     logoText: string;
@@ -102,14 +110,18 @@ export type BlogArticle = {
 };
 
 export async function getSiteChrome(): Promise<SiteChrome> {
-  const [brand, headerMap, footerMap, navMap, homeBlocks, collections] = await Promise.all([
+  cmsNoStore();
+  const [brand, headerMap, footerMap, navMap, homeBlocks, collections, products] = await Promise.all([
     getBrand(),
     getConfigMap("header"),
     getConfigMap("footer"),
     getConfigMap("nav"),
     getContentMap("home"),
     getCollections(),
+    getProducts(),
   ]);
+
+  const featured = products[0] ?? null;
 
   const whatsappUrl = buildWhatsAppUrl(brand.whatsapp);
   const navigation = parseJson<NavItem[]>(navMap.navigation, defaultNavigation);
@@ -118,6 +130,15 @@ export async function getSiteChrome(): Promise<SiteChrome> {
 
   return {
     brand,
+    featuredProduct: featured
+      ? {
+          title: featured.title,
+          slug: featured.slug,
+          price: featured.price,
+          currency: featured.currency,
+          images: featured.images,
+        }
+      : null,
     header: {
       logoLetter: headerMap.logoLetter ?? defaultHeader.logoLetter,
       logoText: headerMap.logoText ?? defaultHeader.logoText,
@@ -153,6 +174,7 @@ export async function getSiteChrome(): Promise<SiteChrome> {
 }
 
 export async function getHomeContent(): Promise<HomeContent> {
+  cmsNoStore();
   const homeBlocks = await getContentMap("home");
 
   const hero = {
@@ -179,6 +201,7 @@ export async function getHomeContent(): Promise<HomeContent> {
 }
 
 export async function getBlogArticles(): Promise<BlogArticle[]> {
+  cmsNoStore();
   if (!hasDb()) return defaultBlogArticles;
 
   try {
@@ -209,6 +232,7 @@ export async function getBlogArticleBySlug(slug: string): Promise<BlogArticle | 
 }
 
 export async function getNavigation(): Promise<NavItem[]> {
+  cmsNoStore();
   const navMap = await getConfigMap("nav");
   return parseJson(navMap.navigation, defaultNavigation);
 }

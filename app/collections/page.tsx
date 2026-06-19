@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getCollections, getProducts } from "@/lib/cms/db";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Collections",
   description: "Shop Vitaro connected health collections and future premium wellness devices.",

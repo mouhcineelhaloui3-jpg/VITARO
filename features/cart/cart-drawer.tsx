@@ -6,14 +6,34 @@ import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { products } from "@/lib/data/catalog";
+import { products as staticProducts } from "@/lib/data/catalog";
 import { formatCurrency } from "@/lib/utils";
+import type { SiteChrome } from "@/lib/cms/site";
 
-export function CartDrawer() {
-  const product = products[0];
+type CartProduct = NonNullable<SiteChrome["featuredProduct"]>;
+
+type CartDrawerProps = {
+  product?: CartProduct | null;
+  whatsappPhone?: string;
+};
+
+export function CartDrawer({ product, whatsappPhone }: CartDrawerProps) {
+  const fallback = staticProducts[0];
+  const cartProduct: CartProduct = product ?? {
+    title: fallback.title,
+    slug: fallback.slug,
+    price: fallback.price,
+    currency: fallback.currency,
+    images: fallback.images,
+  };
+  const phone = whatsappPhone ?? "212682217644";
+
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const subtotal = useMemo(() => product.price * quantity, [product.price, quantity]);
+  const subtotal = useMemo(
+    () => cartProduct.price * quantity,
+    [cartProduct.price, quantity],
+  );
 
   return (
     <>
@@ -66,16 +86,16 @@ export function CartDrawer() {
             <Card className="flex gap-5 p-5">
               <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-section-bg">
                 <Image
-                  src={product.images[0]}
-                  alt={product.title}
+                  src={cartProduct.images[0]}
+                  alt={cartProduct.title}
                   fill
                   sizes="80px"
                   className="object-contain p-1"
                 />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-heading">{product.title}</h3>
-                <p className="mt-1 text-sm text-muted">Obsidian Black</p>
+                <h3 className="font-bold text-heading">{cartProduct.title}</h3>
+                <p className="mt-1 text-sm text-muted">الكمية {quantity}</p>
                 <div className="mt-4 flex items-center justify-between">
                   <div className="inline-flex items-center rounded-xl border border-border">
                     <button
@@ -97,7 +117,7 @@ export function CartDrawer() {
                     </button>
                   </div>
                   <span className="font-bold text-heading">
-                    {formatCurrency(subtotal, product.currency)}
+                    {formatCurrency(subtotal, cartProduct.currency as "MAD")}
                   </span>
                 </div>
               </div>
@@ -106,7 +126,7 @@ export function CartDrawer() {
             <div className="mt-auto space-y-5 border-t border-border pt-6">
               <div className="flex items-center justify-between text-lg font-bold text-heading">
                 <span>الإجمالي الفرعي</span>
-                <span>{formatCurrency(subtotal, product.currency)}</span>
+                <span>{formatCurrency(subtotal, cartProduct.currency as "MAD")}</span>
               </div>
               <Button
                 className="w-full"
@@ -123,7 +143,7 @@ export function CartDrawer() {
                 variant="secondary"
                 onClick={() => {
                   window.open(
-                    `https://wa.me/212682217644?text=${encodeURIComponent(`مرحباً، أريد إتمام طلب ${quantity} من ${product.title} بسعر إجمالي ${subtotal} درهم`)}`,
+                    `https://wa.me/${phone}?text=${encodeURIComponent(`مرحباً، أريد إتمام طلب ${quantity} من ${cartProduct.title} بسعر إجمالي ${subtotal} درهم`)}`,
                     "_blank",
                   );
                 }}

@@ -18,6 +18,10 @@ import {
   defaultHomeSections,
   defaultTrustChips,
 } from "@/lib/cms/defaults";
+import {
+  defaultStoreSettings,
+  storeSettingsToConfig,
+} from "@/lib/cms/store-settings";
 
 export async function POST() {
   const session = await requireAdminSession();
@@ -49,6 +53,14 @@ export async function POST() {
       configCount++;
     }
     results.siteConfig = configCount;
+
+    for (const entry of storeSettingsToConfig(defaultStoreSettings)) {
+      await prisma.siteConfig.upsert({
+        where: { key: entry.key },
+        update: { value: entry.value, group: entry.group },
+        create: entry,
+      });
+    }
 
     const headerEntries = Object.entries(defaultHeader).map(([key, value]) => ({
       key,

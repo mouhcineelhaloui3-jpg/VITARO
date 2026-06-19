@@ -14,21 +14,23 @@ import { Section } from "@/components/layout/section";
 import { Card } from "@/components/ui/card";
 import { BuyBox } from "@/features/products/buy-box";
 import { ProductGallery } from "@/features/products/product-gallery";
-import { getProductBySlug, products } from "@/lib/data/catalog";
-import { getFaqs, getTestimonials } from "@/lib/cms/db";
-import { faqs as staticFaqs, testimonials as staticTestimonials } from "@/lib/data/content";
+import { getProductBySlug, getProducts, getFaqs, getTestimonials, getBrand } from "@/lib/cms/db";
+import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
+
+export const dynamic = "force-dynamic";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await getProducts();
   return products.map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     return {};
@@ -42,13 +44,17 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
   }
 
-  const [faqs, testimonials] = await Promise.all([getFaqs(), getTestimonials()]);
+  const [faqs, testimonials, brand] = await Promise.all([
+    getFaqs(),
+    getTestimonials(),
+    getBrand(),
+  ]);
 
   const serviceCards: { icon: LucideIcon; title: string; body: string }[] = [
     {
@@ -67,6 +73,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       body: "ضمان استرداد الأموال خلال 30 يوماً يتواجد في صفحة الدفع والمنتجات ومركز المساعدة.",
     },
   ];
+
+  const whatsappUrl = buildWhatsAppUrl(
+    brand.whatsapp,
+    `سلام، بغيت نطلب ${product.title} بثمن ${product.price} درهم`,
+  );
 
   return (
     <>
@@ -199,7 +210,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </p>
           <div className="mt-8 flex justify-center">
             <a
-              href={`https://wa.me/212682217644?text=${encodeURIComponent(`سلام، بغيت نطلب ${product.title} بثمن ${product.price} درهم`)}`}
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-7 py-3.5 text-sm font-semibold text-white transition hover:-translate-y-0.5"

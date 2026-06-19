@@ -27,6 +27,8 @@ import { getHomeContent } from "@/lib/cms/site";
 import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
 import { formatCurrency } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const [allProducts, testimonials, faqs, home, brand] = await Promise.all([
     getProducts(),

@@ -8,9 +8,11 @@ import type { SiteChrome } from "@/lib/cms/site";
 type HeaderProps = {
   header: SiteChrome["header"];
   brandName: string;
+  featuredProduct: SiteChrome["featuredProduct"];
+  whatsappPhone: string;
 };
 
-export function Header({ header, brandName }: HeaderProps) {
+export function Header({ header, brandName, featuredProduct, whatsappPhone }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
@@ -49,7 +51,7 @@ export function Header({ header, brandName }: HeaderProps) {
           >
             <MessageCircle className="h-5 w-5" />
           </a>
-          <CartDrawer />
+          <CartDrawer product={featuredProduct} whatsappPhone={whatsappPhone} />
           <ButtonLink
             className="hidden sm:inline-flex"
             href={header.productHref}

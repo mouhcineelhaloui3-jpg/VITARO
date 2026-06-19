@@ -25,7 +25,12 @@ export function ConditionalSiteChrome({
   return (
     <>
       <AnnouncementBar announcement={chrome.announcement} />
-      <Header header={chrome.header} brandName={chrome.brand.name} />
+      <Header
+        header={chrome.header}
+        brandName={chrome.brand.name}
+        featuredProduct={chrome.featuredProduct}
+        whatsappPhone={chrome.brand.whatsapp}
+      />
       <main className="flex-1">{children}</main>
       <Footer footer={chrome.footer} />
       <FloatingWhatsApp whatsappUrl={chrome.whatsappUrl} />

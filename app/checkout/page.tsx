@@ -5,21 +5,34 @@ import { Section } from "@/components/layout/section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { products } from "@/lib/data/catalog";
+import { getProducts, getBrand } from "@/lib/cms/db";
+import { getStoreSettings } from "@/lib/cms/store-settings";
 import { formatCurrency } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "إتمام الطلب",
   description: "إتمام الطلب في فيتارو، دفع آمن أو الدفع عند الاستلام.",
 };
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const [products, brand, settings] = await Promise.all([
+    getProducts(),
+    getBrand(),
+    getStoreSettings(),
+  ]);
   const product = products[0];
-  const paymentMethods: { label: string; icon: LucideIcon; id: string }[] = [
-    { label: "الدفع عند الاستلام", icon: Truck, id: "cod" },
-    { label: "البطاقة البنكية", icon: WalletCards, id: "card" },
-    { label: "المحفظة الإلكترونية", icon: ShieldCheck, id: "wallet" },
-  ];
+
+  if (!product) {
+    throw new Error("No products configured for checkout.");
+  }
+
+  const paymentMethods: { label: string; icon: LucideIcon; id: string; enabled: boolean }[] = [
+    { label: "الدفع عند الاستلام", icon: Truck, id: "cod", enabled: settings.codEnabled },
+    { label: "البطاقة البنكية", icon: WalletCards, id: "card", enabled: settings.cardEnabled },
+    { label: "المحفظة الإلكترونية", icon: ShieldCheck, id: "wallet", enabled: settings.walletEnabled },
+  ].filter((method) => method.enabled);
 
   return (
     <Section
@@ -46,10 +59,10 @@ export default function CheckoutPage() {
             </div>
             <p className="mt-4 font-semibold text-heading">طريقة الدفع</p>
             <div className="grid gap-3 sm:grid-cols-3">
-              {paymentMethods.map((method) => (
+              {paymentMethods.map((method, index) => (
                 <button
                   key={method.id}
-                  className={`rounded-3xl border ${method.id === 'cod' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-zinc-200 bg-white dark:border-white/10 dark:bg-white/5'} p-4 text-right font-semibold transition hover:border-emerald-300`}
+                  className={`rounded-3xl border ${index === 0 ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-zinc-200 bg-white dark:border-white/10 dark:bg-white/5'} p-4 text-right font-semibold transition hover:border-emerald-300`}
                   type="button"
                 >
                   <method.icon className="mb-3 h-5 w-5 text-emerald-500" />
@@ -60,7 +73,9 @@ export default function CheckoutPage() {
             <Button size="lg" type="button" className="mt-4">
               تأكيد الطلب
             </Button>
-            <p className="text-center text-xs text-muted-fg">سنتواصل معك عبر الواتساب لتأكيد الطلب قبل الشحن.</p>
+            <p className="text-center text-xs text-muted-fg">
+              سنتواصل معك عبر واتساب ({brand.whatsapp}) لتأكيد الطلب قبل الشحن.
+            </p>
           </form>
         </Card>
 
