@@ -3,83 +3,73 @@ import {
   Activity,
   ArrowLeft,
   BadgeCheck,
+  BarChart3,
   Bone,
   CheckCircle2,
   Droplets,
   Dumbbell,
   Gauge,
   MessageCircle,
-  Ruler,
   ShieldCheck,
   Smartphone,
   Star,
   Truck,
-  Zap,
+  Wallet,
 } from "lucide-react";
 
 import { Section } from "@/components/layout/section";
 import { Reveal } from "@/components/motion/reveal";
 import { CompanionAppSection } from "@/components/commerce/companion-app-section";
-import { ScaleScienceSection } from "@/components/commerce/scale-science-section";
 import { ScaleUsageGuide } from "@/components/commerce/scale-usage-guide";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, FeatureCard } from "@/components/ui/card";
-import { getProducts, getTestimonials, getFaqs, getBrand } from "@/lib/cms/db";
-import { getHomeContent } from "@/lib/cms/site";
+import { getProducts, getBrand } from "@/lib/cms/db";
+import { homeCopy } from "@/lib/data/home-copy";
 import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
 import { formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+const offeringIcons = {
+  scale: Gauge,
+  muscle: Dumbbell,
+  fat: Activity,
+  water: Droplets,
+  bone: Bone,
+  chart: BarChart3,
+} as const;
+
+const trustIcons = [Truck, Wallet, ShieldCheck] as const;
+
 export default async function Home() {
-  const [allProducts, testimonials, faqs, home, brand] = await Promise.all([
-    getProducts(),
-    getTestimonials(),
-    getFaqs(),
-    getHomeContent(),
-    getBrand(),
-  ]);
+  const [allProducts, brand] = await Promise.all([getProducts(), getBrand()]);
   const product = allProducts[0];
 
   if (!product) {
     throw new Error("No products configured for the storefront.");
   }
 
-  const whatsappOrderLink = (title: string, price: number) =>
-    buildWhatsAppUrl(
-      brand.whatsapp,
-      `سلام، بغيت نطلب ${title} بثمن ${price} درهم`,
-    );
-
-  const trustChips = [
-    { icon: Truck, label: home.trustChips[0] ?? "توصيل لجميع المدن" },
-    { icon: ShieldCheck, label: home.trustChips[1] ?? "خلّص فالدار (COD)" },
-    { icon: BadgeCheck, label: home.trustChips[2] ?? "ضمان سنتين" },
-  ];
-
-  const steps = [
-    { icon: Zap, title: "حُط رجليك", body: "الميزان كيتعرف عليك ويعطيك القياس فثواني." },
-    { icon: Smartphone, title: "شوف النتائج", body: "كل التفاصيل ديال جسمك فالتطبيق وبكل بساطة." },
-    { icon: BadgeCheck, title: "تبّع تقدمك", body: "شوف فين وصلتي ووصل لهدفك بسهولة." },
-  ];
+  const whatsappOrderLink = buildWhatsAppUrl(
+    brand.whatsapp,
+    `سلام، بغيت نطلب ${product.title} بثمن ${product.price} درهم`,
+  );
 
   return (
     <>
-      {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-b from-background to-section-bg px-4 pb-16 pt-12 sm:px-6 lg:px-8 lg:pb-24 lg:pt-20">
         <div className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(circle_at_50%_0%,rgba(5,150,105,0.08),transparent_60%)]" />
-        
+
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <Reveal>
-            <Badge variant="success">{home.hero.badge}</Badge>
-            
-            <h1 className="mt-6 text-[2.75rem] font-extrabold leading-[1.1] tracking-[-0.04em] text-heading sm:text-6xl lg:text-[4rem]">
-              {home.hero.title}
+            <Badge variant="success">{homeCopy.hero.badge}</Badge>
+
+            <h1 className="mt-6 text-[2.75rem] font-extrabold leading-[1.1] tracking-[-0.04em] text-heading sm:text-6xl lg:text-[3.75rem]">
+              {homeCopy.hero.title}
             </h1>
-            
-            <p className="mt-7 max-w-xl text-[1.125rem] leading-[1.75] text-body">
-              {home.hero.subtitle}
+
+            <p className="mt-7 max-w-xl text-[1.125rem] leading-[1.8] text-body">
+              {homeCopy.hero.subtitle}
             </p>
 
             <div className="mt-8 flex items-end gap-4">
@@ -94,30 +84,29 @@ export default async function Home() {
             </div>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <ButtonLink
-                href={whatsappOrderLink(product.title, product.price)}
-                size="lg"
-                variant="primary"
-              >
-                <MessageCircle className="h-5 w-5" />
-                {home.hero.cta_whatsapp}
-              </ButtonLink>
-              <ButtonLink href={`/products/${product.slug}`} size="lg" variant="secondary">
-                {home.hero.cta_buy}
+              <ButtonLink href={`/products/${product.slug}`} size="lg" variant="primary">
+                {homeCopy.hero.ctaBuy}
                 <ArrowLeft className="h-5 w-5" />
+              </ButtonLink>
+              <ButtonLink href={whatsappOrderLink} size="lg" variant="secondary">
+                <MessageCircle className="h-5 w-5" />
+                {homeCopy.hero.ctaWhatsapp}
               </ButtonLink>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-6">
-              {trustChips.map((chip) => (
-                <span
-                  key={chip.label}
-                  className="inline-flex items-center gap-2.5 text-[0.9375rem] font-medium text-body"
-                >
-                  <chip.icon className="h-5 w-5 text-accent" />
-                  {chip.label}
-                </span>
-              ))}
+              {homeCopy.hero.trust.map((label, index) => {
+                const Icon = trustIcons[index];
+                return (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-2.5 text-[0.9375rem] font-medium text-body"
+                  >
+                    <Icon className="h-5 w-5 text-accent" />
+                    {label}
+                  </span>
+                );
+              })}
             </div>
           </Reveal>
 
@@ -136,181 +125,92 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* KEY BENEFITS */}
       <Section
         background="white"
-        eyebrow={home.sections.benefits_eyebrow}
-        title={home.sections.benefits_title}
+        eyebrow={homeCopy.offerings.eyebrow}
+        title={homeCopy.offerings.title}
       >
-        <div className="grid gap-6 sm:grid-cols-2">
-          {product.features.map((feature) => (
-            <FeatureCard key={feature.title} className="flex gap-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent/10">
-                <CheckCircle2 className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold tracking-tight text-heading">
-                  {feature.title}
-                </h3>
-                <p className="mt-2.5 text-[0.9375rem] leading-[1.7] text-body">
-                  {feature.description}
-                </p>
-              </div>
-            </FeatureCard>
-          ))}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {homeCopy.offerings.items.map((item) => {
+            const Icon = offeringIcons[item.icon];
+            return (
+              <FeatureCard key={item.label} className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50">
+                  <Icon className="h-6 w-6 text-accent" />
+                </div>
+                <h3 className="text-lg font-bold text-heading">{item.label}</h3>
+              </FeatureCard>
+            );
+          })}
         </div>
       </Section>
 
-      {/* HOW IT WORKS */}
-      <Section 
-        background="gray"
-        id="how" 
-        eyebrow={home.sections.how_eyebrow}
-        title={home.sections.how_title}
-      >
+      <Section background="gray" id="how" eyebrow={homeCopy.how.eyebrow} title={homeCopy.how.title}>
         <div className="grid gap-6 md:grid-cols-3">
-          {steps.map((step, index) => (
+          {homeCopy.how.steps.map((step, index) => (
             <Card key={step.title}>
-              <div className="flex items-center justify-between">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent">
-                  <step.icon className="h-7 w-7 text-white" />
-                </div>
-                <span className="text-5xl font-extrabold text-border">
-                  {index + 1}
-                </span>
-              </div>
-              <h3 className="mt-6 text-xl font-bold tracking-tight text-heading">
-                {step.title}
-              </h3>
+              <span className="text-5xl font-extrabold text-border">{index + 1}</span>
+              <h3 className="mt-4 text-xl font-bold tracking-tight text-heading">{step.title}</h3>
               <p className="mt-3 text-[0.9375rem] leading-[1.7] text-body">{step.body}</p>
             </Card>
           ))}
         </div>
       </Section>
 
-      <ScaleScienceSection />
+      <Section background="white" eyebrow={homeCopy.why.eyebrow} title={homeCopy.why.title}>
+        <Card className="mx-auto max-w-3xl p-8">
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {homeCopy.why.items.map((item) => (
+              <li key={item} className="flex items-start gap-3 text-base leading-7 text-body">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </Section>
 
-      <ScaleUsageGuide
-        whatsappUrl={whatsappOrderLink(
-          product.title,
-          product.price,
-        )}
-      />
+      <Section background="gray" eyebrow={homeCopy.app.eyebrow} title={homeCopy.app.title}>
+        <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {homeCopy.app.items.map((item) => (
+            <Card key={item} className="p-5 text-center">
+              <Smartphone className="mx-auto h-6 w-6 text-emerald-600" />
+              <p className="mt-3 font-semibold text-heading">{item}</p>
+            </Card>
+          ))}
+        </div>
+      </Section>
 
       <CompanionAppSection />
 
-      {/* METRICS */}
-      <Section
-        background="white"
-        eyebrow={home.sections.metrics_eyebrow}
-        title={home.sections.metrics_title}
-      >
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { icon: Gauge, title: "الوزن و BMI", body: "تعرف واش الوزن ديالك مناسب مع الطول ديالك." },
-            { icon: Activity, title: "نسبة الشحم", body: "تابع الشحم فالجسم وشوف التغيير مع الوقت." },
-            { icon: Dumbbell, title: "العضلات", body: "مفيد للرياضة وبناء الكتلة العضلية." },
-            { icon: Droplets, title: "الماء", body: "شوف نسبة الماء فالجسم باش تبقى مرطّب." },
-            { icon: Bone, title: "كتلة العظام", body: "يعطيك فكرة على صحة العظام بشكل مبسط." },
-            { icon: Smartphone, title: "تطبيق OKOK", body: "كل النتائج كتتحفظ فالتطبيق مع مبيانات سهلة." },
-          ].map((item) => (
-            <FeatureCard key={item.title}>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50">
-                <item.icon className="h-7 w-7 text-accent" />
-              </div>
-              <h3 className="mt-6 text-xl font-bold tracking-tight text-heading">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-[0.9375rem] leading-[1.7] text-body">{item.body}</p>
-            </FeatureCard>
-          ))}
-        </div>
+      <Section background="white" eyebrow={homeCopy.safety.eyebrow} title={homeCopy.safety.title}>
+        <Card className="mx-auto max-w-3xl border-emerald-100 bg-gradient-to-br from-emerald-50/80 to-white p-8 text-center sm:p-10">
+          <BadgeCheck className="mx-auto h-10 w-10 text-emerald-600" />
+          <p className="mt-5 text-lg leading-8 text-body sm:text-xl">{homeCopy.safety.body}</p>
+        </Card>
       </Section>
 
-      {/* QUALITY */}
-      <Section
-        background="gray"
-        eyebrow={home.sections.quality_eyebrow}
-        title={home.sections.quality_title}
-      >
-        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <Card className="overflow-hidden bg-gradient-to-br from-heading to-heading/90 p-10 text-white">
-            <div className="grid gap-10 md:grid-cols-2 md:items-center">
-              <div>
-                <Badge variant="success">زجاج مقسّى</Badge>
-                <h3 className="mt-5 text-3xl font-bold tracking-[-0.03em]">
-                  قوي وآمن للاستعمال اليومي.
-                </h3>
-                <p className="mt-5 leading-[1.75] text-white/80">
-                  سطح زجاجي مقاوم، 4 مستشعرات معدنية، وشاشة LCD زرقاء واضحة حتى فالليل.
-                </p>
-              </div>
-              <div className="relative aspect-square rounded-3xl bg-gradient-to-br from-zinc-800 to-zinc-900 p-6 shadow-2xl">
-                <div className="absolute inset-x-8 top-12 h-8 rounded-lg bg-sky-400/90 shadow-[0_0_35px_rgba(56,189,248,0.75)]" />
-                <div className="absolute inset-x-8 bottom-12 grid grid-cols-2 gap-8">
-                  {Array.from({ length: 4 }).map((_, index) => (
-                    <div key={index} className="h-16 rounded-full bg-zinc-200/90" />
-                  ))}
-                </div>
-                <div className="absolute inset-8 rounded-[1.75rem] border border-white/20" />
-              </div>
-            </div>
-          </Card>
+      <ScaleUsageGuide whatsappUrl={whatsappOrderLink} />
 
-          <div className="grid gap-6">
-            <Card>
-              <Ruler className="h-8 w-8 text-accent" />
-              <h3 className="mt-5 text-xl font-bold text-heading">حجم عملي وخفيف</h3>
-              <p className="mt-3 text-[0.9375rem] leading-[1.7] text-body">
-                تقريباً 26cm وبسماكة 2.2cm، كيدخل بسهولة فالحمام ولا الغرفة.
-              </p>
-            </Card>
-            <Card>
-              <Truck className="h-8 w-8 text-accent" />
-              <h3 className="mt-5 text-xl font-bold text-heading">Free shipping</h3>
-              <p className="mt-3 text-[0.9375rem] leading-[1.7] text-body">
-                التوصيل مجاني لجميع المدن المغربية، وكتخلّص حتى توصلك السلعة.
-              </p>
-            </Card>
-          </div>
-        </div>
-      </Section>
-
-      {/* REVIEWS */}
-      <Section 
-        background="white"
-        id="reviews" 
-        eyebrow={home.sections.reviews_eyebrow}
-        title={home.sections.reviews_title}
-      >
+      <Section background="gray" id="reviews" eyebrow={homeCopy.reviews.eyebrow} title={homeCopy.reviews.title}>
         <div className="grid gap-6 lg:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <Card key={testimonial.name} className="relative">
+          {homeCopy.reviews.items.map((review, index) => (
+            <Card key={review.quote} className="relative">
               <div className="flex gap-1.5 text-accent">
-                {Array.from({ length: testimonial.rating }).map((_, index) => (
-                  <Star key={index} className="h-5 w-5 fill-current" />
+                {Array.from({ length: review.rating }).map((_, starIndex) => (
+                  <Star key={starIndex} className="h-5 w-5 fill-current" />
                 ))}
               </div>
-              <p className="mt-6 text-[1.0625rem] leading-[1.75] text-body">
-                "{testimonial.quote}"
-              </p>
-              <p className="mt-6 font-bold text-heading">{testimonial.name}</p>
-              <p className="mt-1 text-sm text-muted">{testimonial.role}</p>
-              <div className="absolute -right-3 -top-3 h-20 w-20 rounded-full bg-accent/5" />
+              <p className="mt-6 text-[1.0625rem] leading-[1.75] text-body">"{review.quote}"</p>
+              <p className="mt-6 text-sm text-muted">زبون فيتارو {index + 1}</p>
             </Card>
           ))}
         </div>
       </Section>
 
-      {/* FAQ */}
-      <Section 
-        background="gray"
-        id="faq"
-        eyebrow={home.sections.faq_eyebrow}
-        title={home.sections.faq_title}
-      >
+      <Section background="white" id="faq" eyebrow={homeCopy.faq.eyebrow} title={homeCopy.faq.title}>
         <div className="mx-auto max-w-3xl divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card shadow-lg">
-          {faqs.slice(0, 4).map((faq) => (
+          {homeCopy.faq.items.map((faq) => (
             <details key={faq.question} className="group p-7">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-heading">
                 {faq.question}
@@ -324,32 +224,38 @@ export default async function Home() {
         </div>
       </Section>
 
-      {/* FINAL CTA */}
-      <Section background="white">
+      <Section background="gray">
         <Card className="overflow-hidden bg-gradient-to-br from-accent to-accent-hover p-10 text-center text-white shadow-[0_20px_70px_rgba(5,150,105,0.3)] lg:p-16">
           <h2 className="mx-auto max-w-2xl text-4xl font-extrabold tracking-[-0.03em] sm:text-5xl">
-            {home.sections.cta_title}
+            {homeCopy.finalCta.title}
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg leading-[1.75] text-white/90">
-            {home.sections.cta_subtitle}
+            {homeCopy.finalCta.subtitle}
+          </p>
+          <p className="mt-8 text-5xl font-extrabold tracking-tight">
+            {formatCurrency(product.price, product.currency)}{" "}
+            <span className="text-2xl font-semibold text-white/85">
+              {homeCopy.finalCta.priceLabel}
+            </span>
           </p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <ButtonLink
-              href={whatsappOrderLink(product.title, product.price)}
+              href={`/products/${product.slug}`}
               size="xl"
               variant="secondary"
               className="bg-white text-accent hover:bg-white/95"
             >
-              <MessageCircle className="h-5 w-5" />
-              {home.hero.cta_whatsapp}
+              {homeCopy.finalCta.ctaBuy}
+              <ArrowLeft className="h-5 w-5" />
             </ButtonLink>
-            <ButtonLink 
-              href={`/products/${product.slug}`} 
-              size="xl" 
+            <ButtonLink
+              href={whatsappOrderLink}
+              size="xl"
               variant="outline"
               className="border-white/30 text-white hover:bg-white hover:text-accent"
             >
-              شوف التفاصيل
+              <MessageCircle className="h-5 w-5" />
+              {homeCopy.finalCta.ctaWhatsapp}
             </ButtonLink>
           </div>
         </Card>
