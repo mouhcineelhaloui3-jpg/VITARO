@@ -34,3 +34,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json({ error: "فشل تحديث الطلب" }, { status: 500 });
   }
 }
+
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await requireAdminSession();
+  if (!session) return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+
+  const { id } = await params;
+
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.order.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: "فشل حذف الطلب" }, { status: 500 });
+  }
+}

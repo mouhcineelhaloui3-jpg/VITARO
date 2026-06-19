@@ -6,8 +6,10 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardList,
+  Download,
   Loader2,
   Package,
+  Trash2,
   Truck,
   Wallet,
 } from "lucide-react";
@@ -16,6 +18,7 @@ import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
+import { downloadOrdersExcel } from "@/lib/services/order-export";
 import {
   ORDER_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -80,7 +83,10 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusDrafts, setStatusDrafts] = useState<Record<string, OrderStatus>>({});
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkWorking, setBulkWorking] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(
     null,
   );
@@ -103,6 +109,13 @@ export default function AdminOrdersPage() {
     revenue: 0,
   };
 
+  const selectedOrders = useMemo(
+    () => orders.filter((order) => selectedIds.has(order.id)),
+    [orders, selectedIds],
+  );
+
+  const allVisibleSelected = orders.length > 0 && orders.every((order) => selectedIds.has(order.id));
+
   const stats = useMemo(
     () => [
       { label: "إجمالي الطلبات", value: String(summary.total), icon: ClipboardList },
@@ -112,6 +125,92 @@ export default function AdminOrdersPage() {
     ],
     [summary],
   );
+
+  function toggleSelect(orderId: string) {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(orderId)) next.delete(orderId);
+      else next.add(orderId);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (allVisibleSelected) {
+      setSelectedIds(new Set());
+      return;
+    }
+    setSelectedIds(new Set(orders.map((order) => order.id)));
+  }
+
+  function exportOrders(targetOrders: AdminOrderRow[]) {
+    if (!targetOrders.length) {
+      setFeedback({ type: "error", text: "لا توجد طلبات للتصدير." });
+      return;
+    }
+
+    const ok = downloadOrdersExcel(targetOrders);
+    if (!ok) {
+      setFeedback({ type: "error", text: "تعذّر إنشاء ملف Excel." });
+      return;
+    }
+
+    setFeedback({
+      type: "success",
+      text: `تم تنزيل ${targetOrders.length} طلب في ملف Excel.`,
+    });
+  }
+
+  async function deleteOrders(ids: string[]) {
+    if (!ids.length) return;
+
+    const confirmed = window.confirm(
+      ids.length === 1
+        ? "هل تريد حذف هذا الطلب نهائياً؟"
+        : `هل تريد حذف ${ids.length} طلبات نهائياً؟`,
+    );
+    if (!confirmed) return;
+
+    setBulkWorking(true);
+    setFeedback(null);
+
+    const res = await fetch("/api/admin/orders/bulk", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+
+    setBulkWorking(false);
+    setDeletingId(null);
+
+    if (!res.ok) {
+      const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+      setFeedback({ type: "error", text: payload?.error ?? "فشل حذف الطلبات" });
+      return;
+    }
+
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+
+    if (expandedId && ids.includes(expandedId)) {
+      setExpandedId(null);
+    }
+
+    setFeedback({
+      type: "success",
+      text: ids.length === 1 ? "تم حذف الطلب." : `تم حذف ${ids.length} طلبات.`,
+    });
+    await mutate(apiUrl);
+    await mutate("/api/admin/orders");
+  }
+
+  async function deleteOrder(orderId: string) {
+    setDeletingId(orderId);
+    await deleteOrders([orderId]);
+  }
 
   async function saveStatus(order: AdminOrderRow) {
     const nextStatus = statusDrafts[order.id] ?? order.status;
@@ -144,7 +243,9 @@ export default function AdminOrdersPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-heading">الطلبات</h1>
-          <p className="text-sm text-muted-fg">تتبع وإدارة طلبات المتجر وحالات التوصيل والدفع.</p>
+          <p className="text-sm text-muted-fg">
+            اختر الطلبات، حدّث حالتها، احذفها، أو صدّرها إلى Excel.
+          </p>
         </div>
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
           إيرادات مؤكدة:{" "}
@@ -184,7 +285,10 @@ export default function AdminOrdersPage() {
         {STATUS_FILTERS.map((filter) => (
           <button
             key={filter.key}
-            onClick={() => setStatusFilter(filter.key)}
+            onClick={() => {
+              setStatusFilter(filter.key);
+              setSelectedIds(new Set());
+            }}
             className={`rounded-full px-4 py-2 text-sm font-medium transition ${
               statusFilter === filter.key
                 ? "bg-emerald-500 text-white"
@@ -195,6 +299,48 @@ export default function AdminOrdersPage() {
           </button>
         ))}
       </div>
+
+      {orders.length > 0 ? (
+        <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
+          <label className="inline-flex items-center gap-2 text-sm font-medium text-heading">
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={toggleSelectAll}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+            />
+            تحديد الكل ({orders.length})
+          </label>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-fg">
+              {selectedIds.size > 0 ? `${selectedIds.size} محدد` : "لم يتم تحديد طلبات"}
+            </span>
+            <button
+              onClick={() => exportOrders(selectedOrders.length ? selectedOrders : orders)}
+              disabled={!orders.length}
+              className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
+            >
+              <Download className="h-4 w-4" />
+              {selectedOrders.length
+                ? `تصدير Excel (${selectedOrders.length})`
+                : "تصدير كل الطلبات Excel"}
+            </button>
+            <button
+              onClick={() => deleteOrders(Array.from(selectedIds))}
+              disabled={selectedIds.size === 0 || bulkWorking}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
+            >
+              {bulkWorking ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              حذف المحدد
+            </button>
+          </div>
+        </Card>
+      ) : null}
 
       {isLoading ? (
         <div className="py-16 text-center text-sm text-subtle">
@@ -218,37 +364,50 @@ export default function AdminOrdersPage() {
             const isExpanded = expandedId === order.id;
             const draftStatus = statusDrafts[order.id] ?? order.status;
             const hasChanges = draftStatus !== order.status;
+            const isSelected = selectedIds.has(order.id);
 
             return (
-              <Card key={order.id} className="overflow-hidden">
+              <Card
+                key={order.id}
+                className={`overflow-hidden transition ${
+                  isSelected ? "ring-2 ring-emerald-400 ring-offset-2" : ""
+                }`}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-4 p-5">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-heading">
-                        #{order.id.slice(-8).toUpperCase()}
-                      </span>
-                      <Badge variant={orderStatusVariant(order.status)}>
-                        {ORDER_STATUS_LABELS[order.status]}
-                      </Badge>
-                      <Badge variant="neutral">{order.itemCount} منتج</Badge>
-                    </div>
-                    <p className="mt-2 text-sm text-body">
-                      {order.customerName}
-                    </p>
-                    <p className="text-xs text-subtle">
-                      {order.phone}
-                      {order.gender ? ` · ${order.gender}` : ""}
-                    </p>
-                    <p className="text-xs text-subtle">
-                      {order.address}
-                      {order.city ? `، ${order.city}` : ""}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-subtle">
-                      <span>{formatDate(order.createdAt)}</span>
-                      <span className="inline-flex items-center gap-1">
-                        <PaymentIcon method={order.paymentMethod} />
-                        {PAYMENT_METHOD_LABELS[order.paymentMethod]}
-                      </span>
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelect(order.id)}
+                      className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600"
+                      aria-label={`تحديد الطلب ${order.id.slice(-8)}`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-heading">
+                          #{order.id.slice(-8).toUpperCase()}
+                        </span>
+                        <Badge variant={orderStatusVariant(order.status)}>
+                          {ORDER_STATUS_LABELS[order.status]}
+                        </Badge>
+                        <Badge variant="neutral">{order.itemCount} منتج</Badge>
+                      </div>
+                      <p className="mt-2 text-sm text-body">{order.customerName}</p>
+                      <p className="text-xs text-subtle">
+                        {order.phone}
+                        {order.gender ? ` · ${order.gender}` : ""}
+                      </p>
+                      <p className="text-xs text-subtle">
+                        {order.address}
+                        {order.city ? `، ${order.city}` : ""}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-subtle">
+                        <span>{formatDate(order.createdAt)}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <PaymentIcon method={order.paymentMethod} />
+                          {PAYMENT_METHOD_LABELS[order.paymentMethod]}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -256,20 +415,29 @@ export default function AdminOrdersPage() {
                     <p className="text-lg font-semibold text-heading">
                       {formatCurrency(order.total, order.currency as "MAD")}
                     </p>
-                    <button
-                      onClick={() => setExpandedId(isExpanded ? null : order.id)}
-                      className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-emerald-700 hover:bg-emerald-50"
-                    >
-                      {isExpanded ? (
-                        <>
-                          إخفاء التفاصيل <ChevronUp className="h-4 w-4" />
-                        </>
-                      ) : (
-                        <>
-                          التفاصيل <ChevronDown className="h-4 w-4" />
-                        </>
-                      )}
-                    </button>
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      <button
+                        onClick={() => exportOrders([order])}
+                        className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-emerald-700 hover:bg-emerald-50"
+                      >
+                        <Download className="h-4 w-4" />
+                        Excel
+                      </button>
+                      <button
+                        onClick={() => setExpandedId(isExpanded ? null : order.id)}
+                        className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-emerald-700 hover:bg-emerald-50"
+                      >
+                        {isExpanded ? (
+                          <>
+                            إخفاء التفاصيل <ChevronUp className="h-4 w-4" />
+                          </>
+                        ) : (
+                          <>
+                            التفاصيل <ChevronDown className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -344,6 +512,18 @@ export default function AdminOrdersPage() {
                           <Check className="h-4 w-4" />
                         )}
                         حفظ الحالة
+                      </button>
+                      <button
+                        onClick={() => deleteOrder(order.id)}
+                        disabled={deletingId === order.id || bulkWorking}
+                        className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 hover:bg-red-100 disabled:opacity-50"
+                      >
+                        {deletingId === order.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                        حذف الطلب
                       </button>
                     </div>
                   </div>
