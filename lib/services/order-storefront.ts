@@ -32,8 +32,11 @@ export async function createStorefrontOrder(input: CheckoutInput) {
   const { prisma } = await import("@/lib/prisma");
   const settings = await getStoreSettings();
 
-  const product = await prisma.product.findUnique({
+  const product = await prisma.product.findFirst({
     where: { slug: input.productSlug, status: "active" },
+    include: { variants: true },
+  }) ?? await prisma.product.findUnique({
+    where: { slug: input.productSlug },
     include: { variants: true },
   });
 
@@ -42,24 +45,24 @@ export async function createStorefrontOrder(input: CheckoutInput) {
   }
 
   const variant =
-    product.variants.find((row) => row.id === input.variantId) ?? product.variants[0];
-
-  if (!variant) {
-    throw new Error("VARIANT_NOT_FOUND");
-  }
+    (input.variantId
+      ? product.variants.find((row) => row.id === input.variantId)
+      : undefined) ?? product.variants[0];
 
   const quantity = Math.max(1, Math.floor(input.quantity));
-  const unitPrice = variant.price.toNumber();
+  const unitPrice = variant ? variant.price.toNumber() : product.price.toNumber();
+  const variantName = variant?.name ?? "افتراضي";
+  const variantSku = variant?.sku ?? `SKU-${product.slug}`;
   const subtotal = unitPrice * quantity;
   const totals = calculateOrderTotals(subtotal, settings);
 
   const order = await prisma.order.create({
     data: {
       email: orderEmailFromPhone(input.phone),
-      customerName: input.customerName.trim(),
+      customerName: input.customerName.trim() || "زبون",
       phone: normalizePhone(input.phone),
-      gender: input.gender.trim(),
-      address: input.address.trim(),
+      gender: input.gender.trim() || "غير محدد",
+      address: input.address.trim() || "غير محدد",
       city: input.city?.trim() || null,
       status: "PENDING",
       paymentMethod: input.paymentMethod,
@@ -71,8 +74,8 @@ export async function createStorefrontOrder(input: CheckoutInput) {
       items: {
         create: {
           productId: product.id,
-          name: `${product.title} — ${variant.name}`,
-          sku: variant.sku,
+          name: `${product.title} — ${variantName}`,
+          sku: variantSku,
           quantity,
           price: unitPrice,
         },

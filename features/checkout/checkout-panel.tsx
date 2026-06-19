@@ -80,10 +80,8 @@ export function CheckoutPanel({
     paymentMethods.find((method) => method.id === paymentMethod)?.label ?? "الدفع عند الاستلام";
 
   function validateForm(): string | null {
-    if (!customerName.trim()) return "الاسم مطلوب";
     if (!phone.trim()) return "رقم الهاتف مطلوب";
-    if (!address.trim()) return "العنوان مطلوب";
-    if (!selectedVariant) return "اختر لون المنتج";
+    if (product.variants.length > 0 && !selectedVariant) return "اختر لون المنتج";
     return null;
   }
 
@@ -106,10 +104,10 @@ export function CheckoutPanel({
           productSlug: product.slug,
           variantId: selectedVariant?.id,
           quantity,
-          customerName: customerName.trim(),
-          gender,
+          customerName: customerName.trim() || "زبون",
+          gender: gender || "غير محدد",
           phone: phone.trim(),
-          address: address.trim(),
+          address: address.trim() || "غير محدد",
           city: city.trim() || undefined,
           paymentMethod,
         }),
@@ -137,10 +135,10 @@ export function CheckoutPanel({
     }
 
     const message = buildOrderWhatsAppMessage({
-      customerName: customerName.trim(),
-      gender,
+      customerName: customerName.trim() || "زبون",
+      gender: gender || "غير محدد",
       phone: phone.trim(),
-      address: address.trim(),
+      address: address.trim() || "غير محدد",
       city: city.trim() || undefined,
       productTitle: product.title,
       variantName: selectedVariant?.name ?? "افتراضي",
@@ -193,8 +191,7 @@ export function CheckoutPanel({
               className="form-input"
               value={customerName}
               onChange={(event) => setCustomerName(event.target.value)}
-              placeholder="الاسم واللقب"
-              required
+              placeholder="الاسم واللقب (اختياري)"
             />
           </label>
 
@@ -232,8 +229,7 @@ export function CheckoutPanel({
               className="form-input resize-none"
               value={address}
               onChange={(event) => setAddress(event.target.value)}
-              placeholder="الحي، الشارع، رقم المنزل..."
-              required
+              placeholder="الحي، الشارع، رقم المنزل... (اختياري)"
             />
           </label>
 
