@@ -13,6 +13,7 @@ import {
 import { Section } from "@/components/layout/section";
 import { CompanionAppSection } from "@/components/commerce/companion-app-section";
 import { ScaleScienceSection } from "@/components/commerce/scale-science-section";
+import { ScaleUsageGuide } from "@/components/commerce/scale-usage-guide";
 import { Card } from "@/components/ui/card";
 import { BuyBox } from "@/features/products/buy-box";
 import { ProductGallery } from "@/features/products/product-gallery";
@@ -104,18 +105,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </Section>
 
-      <Section eyebrow="طريقة الاستعمال" title="كيفاش تستعملو؟ 3 خطوات بسيطة.">
-        <div className="grid gap-4 md:grid-cols-3">
-          {product.usageSteps.map((step, index) => (
-            <Card key={step} className="p-6">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-500 text-lg font-bold text-white">
-                {index + 1}
-              </span>
-              <p className="mt-5 leading-7 text-body">{step}</p>
-            </Card>
-          ))}
-        </div>
-      </Section>
+      <ScaleUsageGuide whatsappUrl={whatsappUrl} />
 
       <ScaleScienceSection />
 
