@@ -12,6 +12,7 @@ import {
 
 import { Section } from "@/components/layout/section";
 import { CompanionAppSection } from "@/components/commerce/companion-app-section";
+import { ScaleScienceSection } from "@/components/commerce/scale-science-section";
 import { Card } from "@/components/ui/card";
 import { BuyBox } from "@/features/products/buy-box";
 import { ProductGallery } from "@/features/products/product-gallery";
@@ -115,6 +116,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ))}
         </div>
       </Section>
+
+      <ScaleScienceSection />
 
       <CompanionAppSection />
 
