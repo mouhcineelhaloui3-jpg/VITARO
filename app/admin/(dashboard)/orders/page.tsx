@@ -279,15 +279,15 @@ export default function AdminOrdersPage() {
                       {order.items.map((item) => (
                         <div
                           key={item.id}
-                          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-white/10 dark:bg-zinc-900"
+                          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400 bg-amber-500 px-4 py-3 text-white shadow-sm"
                         >
                           <div>
-                            <p className="font-medium text-heading">{item.name}</p>
-                            <p className="text-xs text-subtle">
+                            <p className="font-medium text-white">{item.name}</p>
+                            <p className="text-xs text-white/85">
                               SKU: {item.sku} · الكمية: {item.quantity}
                             </p>
                           </div>
-                          <p className="font-medium text-heading">
+                          <p className="font-semibold text-white">
                             {formatCurrency(item.price * item.quantity, order.currency as "MAD")}
                           </p>
                         </div>
@@ -295,17 +295,23 @@ export default function AdminOrdersPage() {
                     </div>
 
                     <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
-                      <div className="flex justify-between rounded-lg bg-white px-3 py-2 dark:bg-zinc-900">
-                        <span className="text-muted-fg">المجموع الفرعي</span>
-                        <span>{formatCurrency(order.subtotal, order.currency as "MAD")}</span>
+                      <div className="flex justify-between rounded-lg border border-amber-400 bg-amber-500 px-3 py-2 text-white">
+                        <span className="text-white/85">المجموع الفرعي</span>
+                        <span className="font-semibold">
+                          {formatCurrency(order.subtotal, order.currency as "MAD")}
+                        </span>
                       </div>
-                      <div className="flex justify-between rounded-lg bg-white px-3 py-2 dark:bg-zinc-900">
-                        <span className="text-muted-fg">الشحن</span>
-                        <span>{formatCurrency(order.shipping, order.currency as "MAD")}</span>
+                      <div className="flex justify-between rounded-lg border border-amber-400 bg-amber-500 px-3 py-2 text-white">
+                        <span className="text-white/85">الشحن</span>
+                        <span className="font-semibold">
+                          {formatCurrency(order.shipping, order.currency as "MAD")}
+                        </span>
                       </div>
-                      <div className="flex justify-between rounded-lg bg-white px-3 py-2 dark:bg-zinc-900">
-                        <span className="text-muted-fg">الضريبة</span>
-                        <span>{formatCurrency(order.tax, order.currency as "MAD")}</span>
+                      <div className="flex justify-between rounded-lg border border-amber-400 bg-amber-500 px-3 py-2 text-white">
+                        <span className="text-white/85">الضريبة</span>
+                        <span className="font-semibold">
+                          {formatCurrency(order.tax, order.currency as "MAD")}
+                        </span>
                       </div>
                     </div>
 
