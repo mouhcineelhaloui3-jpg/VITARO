@@ -52,20 +52,29 @@ export function CompanionAppSection({
             ))}
           </ul>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <ButtonLink
               href={companionApp.playStoreUrl}
               target="_blank"
               rel="noopener noreferrer"
               size="lg"
               variant="primary"
+              className="flex-1"
             >
               <Download className="h-5 w-5" />
-              {companionApp.downloadLabel}
+              {companionApp.playStoreLabel}
             </ButtonLink>
-            <p className="mt-3 text-xs text-muted-fg" dir="ltr">
-              {companionApp.playStoreUrl}
-            </p>
+            <ButtonLink
+              href={companionApp.appStoreUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="lg"
+              variant="secondary"
+              className="flex-1"
+            >
+              <Download className="h-5 w-5" />
+              {companionApp.appStoreLabel}
+            </ButtonLink>
           </div>
         </Card>
 
