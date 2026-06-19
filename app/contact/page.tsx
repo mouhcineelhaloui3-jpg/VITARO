@@ -1,8 +1,8 @@
 import { Mail, MapPin, MessageCircle, Phone, type LucideIcon } from "lucide-react";
 
 import { Section } from "@/components/layout/section";
-import { Badge } from "@/components/ui/badge";
 import { Card, FeatureCard } from "@/components/ui/card";
+import { LocationMap } from "@/components/site/location-map";
 import { ContactForm } from "@/features/contact/contact-form";
 import { brand, faqs } from "@/lib/data/content";
 
@@ -68,17 +68,13 @@ export default function ContactPage() {
         </div>
       </Section>
 
-      <Section 
+      <Section
         background="white"
-        eyebrow="الموقع" 
-        title="خريطة جوجل."
+        eyebrow="الموقع"
+        title="نحن في بني ملال."
+        description="اعثر علينا في بني ملال، المغرب — أو افتح الخريطة مباشرة في خرائط جوجل."
       >
-        <Card className="min-h-96 bg-gradient-to-br from-section-bg to-background p-10">
-          <Badge variant="success">جاهز لدمج الخرائط</Badge>
-          <p className="mt-6 max-w-xl text-2xl font-bold tracking-tight text-heading">
-            يمكن إضافة خرائط جوجل، ومواقع المتاجر، أو مراكز الدعم الإقليمية هنا.
-          </p>
-        </Card>
+        <LocationMap />
       </Section>
     </>
   );

@@ -25,7 +25,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       where: { id },
       data: { status: parsed.data.status },
       include: {
-        user: { select: { name: true, email: true } },
         items: true,
       },
     });

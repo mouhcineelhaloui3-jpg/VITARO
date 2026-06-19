@@ -20,7 +20,11 @@ export type AdminOrderRow = {
   currency: string;
   createdAt: string;
   updatedAt: string;
-  customerName: string | null;
+  customerName: string;
+  phone: string;
+  gender: string | null;
+  address: string;
+  city: string | null;
   items: AdminOrderItem[];
   itemCount: number;
 };
@@ -43,6 +47,11 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 type DbOrder = {
   id: string;
   email: string;
+  customerName: string;
+  phone: string;
+  gender: string | null;
+  address: string;
+  city: string | null;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   subtotal: { toNumber(): number };
@@ -52,7 +61,6 @@ type DbOrder = {
   currency: string;
   createdAt: Date;
   updatedAt: Date;
-  user: { name: string | null; email: string } | null;
   items: {
     id: string;
     name: string;
@@ -75,7 +83,11 @@ export function mapAdminOrder(row: DbOrder): AdminOrderRow {
     currency: row.currency,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
-    customerName: row.user?.name ?? null,
+    customerName: row.customerName || "—",
+    phone: row.phone || "—",
+    gender: row.gender,
+    address: row.address || "—",
+    city: row.city,
     items: row.items.map((item) => ({
       id: item.id,
       name: item.name,

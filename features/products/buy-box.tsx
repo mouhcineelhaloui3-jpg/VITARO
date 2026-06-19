@@ -1,22 +1,48 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, MessageCircle, Minus, Plus, ShieldCheck, Timer, Truck } from "lucide-react";
+import {
+  CheckCircle2,
+  MessageCircle,
+  Minus,
+  Plus,
+  ShieldCheck,
+  Timer,
+  Truck,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import type { Product } from "@/types/commerce";
 import { trackEvent } from "@/lib/analytics";
 
-export function BuyBox({ product }: { product: Product }) {
+type BuyBoxProps = {
+  product: Product;
+  whatsappPhone?: string;
+};
+
+function checkoutHref(product: Product, variantId: string, quantity: number) {
+  const params = new URLSearchParams({
+    product: product.slug,
+    variant: variantId,
+    qty: String(quantity),
+  });
+  return `/checkout?${params.toString()}`;
+}
+
+export function BuyBox({ product }: BuyBoxProps) {
   const [variantId, setVariantId] = useState(product.variants[0]?.id);
   const [quantity, setQuantity] = useState(1);
   const selectedVariant = useMemo(
     () => product.variants.find((variant) => variant.id === variantId) ?? product.variants[0],
     [product.variants, variantId],
   );
+
+  const orderUrl = selectedVariant
+    ? checkoutHref(product, selectedVariant.id, quantity)
+    : `/checkout?product=${product.slug}`;
 
   return (
     <>
@@ -93,37 +119,40 @@ export function BuyBox({ product }: { product: Product }) {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <Button
+          <ButtonLink
+            href={orderUrl}
             size="lg"
             onClick={() =>
-              trackEvent("add_to_cart", {
+              trackEvent("begin_checkout", {
                 productId: product.id,
                 variantId: selectedVariant.id,
                 quantity,
               })
             }
           >
-            زيدو للسلة
-          </Button>
-          <Button
+            اطلب عبر الموقع
+          </ButtonLink>
+          <ButtonLink
+            href={orderUrl}
             size="lg"
             variant="accent"
-            onClick={() => {
-              trackEvent("whatsapp_click", {
+            onClick={() =>
+              trackEvent("whatsapp_checkout_click", {
                 productId: product.id,
                 variantId: selectedVariant.id,
                 quantity,
-              });
-              window.open(
-                `https://wa.me/212682217644?text=${encodeURIComponent(`مرحباً، أريد طلب المنتج: ${product.title} بسعر ${selectedVariant.price} درهم`)}`,
-                "_blank",
-              );
-            }}
+              })
+            }
           >
             <MessageCircle className="ms-2 h-5 w-5" />
-            اطلب عبر واتساب الآن
-          </Button>
+            اطلب عبر واتساب
+          </ButtonLink>
         </div>
+
+        <p className="text-center text-xs text-muted-fg">
+          في صفحة الطلب أدخل اسمك، الجنس، الهاتف، والعنوان — ثم أكّد عبر الموقع أو أرسل نفس
+          البيانات على واتساب.
+        </p>
 
         <div className="grid gap-3 text-sm text-surface-body">
           <p className="flex items-center gap-2">
@@ -149,22 +178,9 @@ export function BuyBox({ product }: { product: Product }) {
               {formatCurrency(selectedVariant.price, product.currency)}
             </p>
           </div>
-          <Button
-            size="sm"
-            onClick={() => {
-              trackEvent("whatsapp_click", {
-                productId: product.id,
-                variantId: selectedVariant.id,
-                quantity,
-              });
-              window.open(
-                `https://wa.me/212682217644?text=${encodeURIComponent(`مرحباً، أريد طلب المنتج: ${product.title} بسعر ${selectedVariant.price} درهم`)}`,
-                "_blank",
-              );
-            }}
-          >
-            اطلب عبر واتساب
-          </Button>
+          <ButtonLink href={orderUrl} size="sm">
+            اطلب الآن
+          </ButtonLink>
         </div>
       </div>
     </>

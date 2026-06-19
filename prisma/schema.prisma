@@ -136,8 +136,13 @@ model Order {
   userId        String?
   user          User?         @relation(fields: [userId], references: [id])
   email         String
+  customerName  String        @default("")
+  phone         String        @default("")
+  gender        String?
+  address       String        @default("")
+  city          String?
   status        OrderStatus   @default(PENDING)
-  paymentMethod PaymentMethod @default(CARD)
+  paymentMethod PaymentMethod @default(COD)
   subtotal      Decimal       @db.Decimal(10, 2)
   shipping      Decimal       @db.Decimal(10, 2)
   tax           Decimal       @db.Decimal(10, 2)

@@ -29,7 +29,6 @@ export async function GET(req: Request) {
         orderBy: { createdAt: "desc" },
         take: 100,
         include: {
-          user: { select: { name: true, email: true } },
           items: true,
         },
       }),

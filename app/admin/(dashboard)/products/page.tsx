@@ -8,23 +8,44 @@ import {
   ExternalLink,
   Loader2,
   Package,
+  Plus,
   ShoppingBag,
   Star,
   Tag,
   Layers,
+  Trash2,
 } from "lucide-react";
 import { useState } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
-import type { AdminProductRow } from "@/lib/services/product-admin";
+import type { AdminProductRow, AdminProductVariant } from "@/lib/services/product-admin";
 
 type ProductDraft = {
   title: string;
   price: string;
   compareAtPrice: string;
+  variants: AdminProductVariant[];
 };
+
+type CreateProductDraft = {
+  title: string;
+  slug: string;
+  description: string;
+  price: string;
+  compareAtPrice: string;
+  variants: AdminProductVariant[];
+};
+
+const emptyCreateDraft = (): CreateProductDraft => ({
+  title: "",
+  slug: "",
+  description: "",
+  price: "",
+  compareAtPrice: "",
+  variants: [{ name: "افتراضي", color: "#111111", inventory: 10 }],
+});
 
 const fetcher = async (url: string): Promise<AdminProductRow[]> => {
   const res = await fetch(url);
@@ -45,6 +66,9 @@ export default function AdminProductsPage() {
     null,
   );
   const [seeding, setSeeding] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createDraft, setCreateDraft] = useState<CreateProductDraft>(emptyCreateDraft);
+  const [creating, setCreating] = useState(false);
 
   const databaseReady = products.some((product) => product.persisted);
 
@@ -56,12 +80,22 @@ export default function AdminProductsPage() {
         title: product.title,
         price: String(product.price),
         compareAtPrice: product.compareAtPrice ? String(product.compareAtPrice) : "",
+        variants:
+          product.variants && product.variants.length > 0
+            ? product.variants.map((variant) => ({
+                id: variant.id,
+                name: variant.name,
+                color: variant.color,
+                inventory: variant.inventory,
+                sku: variant.sku,
+              }))
+            : [{ name: "افتراضي", color: "#111111", inventory: 0 }],
       },
     }));
     setFeedback(null);
   }
 
-  function updateDraft(productId: string, field: keyof ProductDraft, value: string) {
+  function updateDraft(productId: string, field: keyof Omit<ProductDraft, "variants">, value: string) {
     setDrafts((current) => ({
       ...current,
       [productId]: {
@@ -69,6 +103,49 @@ export default function AdminProductsPage() {
         [field]: value,
       },
     }));
+  }
+
+  function updateVariant(
+    productId: string,
+    index: number,
+    field: keyof AdminProductVariant,
+    value: string | number,
+  ) {
+    setDrafts((current) => ({
+      ...current,
+      [productId]: {
+        ...current[productId],
+        variants: current[productId].variants.map((variant, i) =>
+          i === index ? { ...variant, [field]: value } : variant,
+        ),
+      },
+    }));
+  }
+
+  function addVariant(productId: string) {
+    setDrafts((current) => ({
+      ...current,
+      [productId]: {
+        ...current[productId],
+        variants: [
+          ...current[productId].variants,
+          { name: "لون جديد", color: "#111111", inventory: 0 },
+        ],
+      },
+    }));
+  }
+
+  function removeVariant(productId: string, index: number) {
+    setDrafts((current) => {
+      if (current[productId].variants.length <= 1) return current;
+      return {
+        ...current,
+        [productId]: {
+          ...current[productId],
+          variants: current[productId].variants.filter((_, i) => i !== index),
+        },
+      };
+    });
   }
 
   async function handleSeed() {
@@ -93,6 +170,91 @@ export default function AdminProductsPage() {
     });
   }
 
+  async function handleCreate() {
+    const price = Number(createDraft.price);
+    const compareAtPrice = createDraft.compareAtPrice ? Number(createDraft.compareAtPrice) : null;
+
+    if (!createDraft.title.trim()) {
+      setFeedback({ type: "error", text: "اسم المنتج مطلوب." });
+      return;
+    }
+
+    if (!Number.isFinite(price) || price <= 0) {
+      setFeedback({ type: "error", text: "أدخل سعراً صالحاً أكبر من 0." });
+      return;
+    }
+
+    if (!createDraft.variants.length) {
+      setFeedback({ type: "error", text: "أضف لوناً واحداً على الأقل." });
+      return;
+    }
+
+    for (const variant of createDraft.variants) {
+      if (!variant.name.trim()) {
+        setFeedback({ type: "error", text: "اسم اللون مطلوب لكل متغير." });
+        return;
+      }
+      if (!/^#[0-9A-Fa-f]{6}$/.test(variant.color)) {
+        setFeedback({ type: "error", text: "استخدم كود لون صالح مثل #111111." });
+        return;
+      }
+    }
+
+    setCreating(true);
+    setFeedback(null);
+
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: createDraft.title.trim(),
+          slug: createDraft.slug.trim() || undefined,
+          description: createDraft.description.trim() || undefined,
+          price,
+          compareAtPrice,
+          variants: createDraft.variants.map((variant) => ({
+            name: variant.name.trim(),
+            color: variant.color,
+            inventory: Number(variant.inventory) || 0,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setFeedback({
+          type: "error",
+          text: data.error ?? "فشل إنشاء المنتج. حاول مرة أخرى.",
+        });
+        return;
+      }
+
+      await mutate("/api/admin/products");
+      setShowCreate(false);
+      setCreateDraft(emptyCreateDraft());
+      setFeedback({ type: "success", text: "تم إنشاء المنتج بنجاح." });
+    } catch {
+      setFeedback({ type: "error", text: "تعذّر الاتصال بالخادم أثناء الإنشاء." });
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  function updateCreateVariant(
+    index: number,
+    field: keyof AdminProductVariant,
+    value: string | number,
+  ) {
+    setCreateDraft((current) => ({
+      ...current,
+      variants: current.variants.map((variant, i) =>
+        i === index ? { ...variant, [field]: value } : variant,
+      ),
+    }));
+  }
+
   async function handleSave(product: AdminProductRow) {
     const draft = drafts[product.id];
     if (!draft) return;
@@ -115,6 +277,22 @@ export default function AdminProductsPage() {
       return;
     }
 
+    if (!draft.variants.length) {
+      setFeedback({ type: "error", text: "أضف لوناً واحداً على الأقل." });
+      return;
+    }
+
+    for (const variant of draft.variants) {
+      if (!variant.name.trim()) {
+        setFeedback({ type: "error", text: "اسم اللون مطلوب لكل متغير." });
+        return;
+      }
+      if (!/^#[0-9A-Fa-f]{6}$/.test(variant.color)) {
+        setFeedback({ type: "error", text: "استخدم كود لون صالح مثل #111111." });
+        return;
+      }
+    }
+
     setSavingId(product.id);
     setFeedback(null);
 
@@ -127,6 +305,13 @@ export default function AdminProductsPage() {
           title: draft.title.trim(),
           price,
           compareAtPrice,
+          variants: draft.variants.map((variant) => ({
+            id: variant.id,
+            name: variant.name.trim(),
+            color: variant.color,
+            inventory: Number(variant.inventory) || 0,
+            sku: variant.sku,
+          })),
         }),
       });
 
@@ -176,16 +361,184 @@ export default function AdminProductsPage() {
             {products.length} منتج — التحكم في الأسعار، الصور، والمخزون.
           </p>
         </div>
-        <a
-          href="/products/smart-digital-body-scale"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700"
-        >
-          <ExternalLink className="h-4 w-4" />
-          معاينة المتجر
-        </a>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setShowCreate((current) => !current);
+              setCreateDraft(emptyCreateDraft());
+              setFeedback(null);
+            }}
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600"
+          >
+            <Plus className="h-4 w-4" />
+            إضافة منتج
+          </button>
+          <a
+            href="/products/smart-digital-body-scale"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700"
+          >
+            <ExternalLink className="h-4 w-4" />
+            معاينة المتجر
+          </a>
+        </div>
       </div>
+
+      {showCreate ? (
+        <Card className="border-emerald-200 bg-emerald-50/40 p-6">
+          <h2 className="text-lg font-semibold text-heading">إضافة منتج جديد</h2>
+          <p className="mt-1 text-sm text-muted-fg">
+            سيظهر المنتج مباشرة في المتجر بعد الإنشاء.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="block space-y-1.5">
+              <span className="text-xs font-medium text-muted-fg">اسم المنتج</span>
+              <input
+                value={createDraft.title}
+                onChange={(event) =>
+                  setCreateDraft((current) => ({ ...current, title: event.target.value }))
+                }
+                className="form-input"
+                placeholder="ميزان ذكي جديد"
+              />
+            </label>
+            <label className="block space-y-1.5">
+              <span className="text-xs font-medium text-muted-fg">رابط المنتج (اختياري)</span>
+              <input
+                value={createDraft.slug}
+                onChange={(event) =>
+                  setCreateDraft((current) => ({ ...current, slug: event.target.value }))
+                }
+                className="form-input"
+                dir="ltr"
+                placeholder="smart-scale-pro"
+              />
+            </label>
+            <label className="block space-y-1.5">
+              <span className="text-xs font-medium text-muted-fg">السعر (MAD)</span>
+              <input
+                value={createDraft.price}
+                onChange={(event) =>
+                  setCreateDraft((current) => ({ ...current, price: event.target.value }))
+                }
+                type="number"
+                min="1"
+                className="form-input"
+                placeholder="299"
+              />
+            </label>
+            <label className="block space-y-1.5 sm:col-span-2 lg:col-span-3">
+              <span className="text-xs font-medium text-muted-fg">الوصف (اختياري)</span>
+              <textarea
+                rows={2}
+                value={createDraft.description}
+                onChange={(event) =>
+                  setCreateDraft((current) => ({ ...current, description: event.target.value }))
+                }
+                className="form-input resize-none"
+                placeholder="وصف قصير للمنتج"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-700">ألوان المنتج</p>
+              <button
+                type="button"
+                onClick={() =>
+                  setCreateDraft((current) => ({
+                    ...current,
+                    variants: [
+                      ...current.variants,
+                      { name: "لون جديد", color: "#111111", inventory: 0 },
+                    ],
+                  }))
+                }
+                className="inline-flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs text-muted-fg hover:border-emerald-400 hover:text-emerald-600"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                إضافة لون
+              </button>
+            </div>
+            {createDraft.variants.map((variant, index) => (
+              <div
+                key={`create-${index}`}
+                className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-[1fr_120px_100px_auto]"
+              >
+                <label className="block space-y-1">
+                  <span className="text-xs font-medium text-muted-fg">اسم اللون</span>
+                  <input
+                    value={variant.name}
+                    onChange={(event) => updateCreateVariant(index, "name", event.target.value)}
+                    className="form-input"
+                    placeholder="أسود"
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs font-medium text-muted-fg">اللون</span>
+                  <input
+                    type="color"
+                    value={variant.color}
+                    onChange={(event) => updateCreateVariant(index, "color", event.target.value)}
+                    className="h-10 w-full cursor-pointer rounded-lg border border-slate-200 bg-white"
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs font-medium text-muted-fg">المخزون</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={variant.inventory}
+                    onChange={(event) =>
+                      updateCreateVariant(index, "inventory", Number(event.target.value))
+                    }
+                    className="form-input"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCreateDraft((current) => ({
+                      ...current,
+                      variants:
+                        current.variants.length <= 1
+                          ? current.variants
+                          : current.variants.filter((_, i) => i !== index),
+                    }))
+                  }
+                  disabled={createDraft.variants.length <= 1}
+                  className="self-end rounded-lg p-2 text-red-500 hover:bg-red-50 disabled:opacity-40"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={handleCreate}
+              disabled={creating}
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-60"
+            >
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {creating ? "جاري الإنشاء..." : "إنشاء المنتج"}
+            </button>
+            <button
+              onClick={() => {
+                setShowCreate(false);
+                setCreateDraft(emptyCreateDraft());
+              }}
+              disabled={creating}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            >
+              إلغاء
+            </button>
+          </div>
+        </Card>
+      ) : null}
 
       {!databaseReady ? (
         <div className="flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -312,7 +665,7 @@ export default function AdminProductsPage() {
                       <span className="text-xs text-muted-fg">الألوان:</span>
                       {product.variants.map((variant) => (
                         <span
-                          key={variant.name}
+                          key={variant.id ?? variant.name}
                           className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs"
                         >
                           <span
@@ -369,9 +722,90 @@ export default function AdminProductsPage() {
                       />
                     </label>
                   </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-slate-700">ألوان المنتج</p>
+                      <button
+                        type="button"
+                        onClick={() => addVariant(product.id)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs text-muted-fg hover:border-emerald-400 hover:text-emerald-600"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        إضافة لون
+                      </button>
+                    </div>
+                    {draft.variants.map((variant, index) => (
+                      <div
+                        key={variant.id ?? `new-${index}`}
+                        className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-[1fr_120px_100px_auto]"
+                      >
+                        <label className="block space-y-1">
+                          <span className="text-xs font-medium text-muted-fg">اسم اللون</span>
+                          <input
+                            value={variant.name}
+                            onChange={(event) =>
+                              updateVariant(product.id, index, "name", event.target.value)
+                            }
+                            className="form-input"
+                            placeholder="أسود"
+                          />
+                        </label>
+                        <label className="block space-y-1">
+                          <span className="text-xs font-medium text-muted-fg">اللون</span>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={variant.color}
+                              onChange={(event) =>
+                                updateVariant(product.id, index, "color", event.target.value)
+                              }
+                              className="h-10 w-12 cursor-pointer rounded-lg border border-slate-200 bg-white"
+                            />
+                            <input
+                              value={variant.color}
+                              onChange={(event) =>
+                                updateVariant(product.id, index, "color", event.target.value)
+                              }
+                              className="form-input font-mono text-xs"
+                              dir="ltr"
+                              placeholder="#111111"
+                            />
+                          </div>
+                        </label>
+                        <label className="block space-y-1">
+                          <span className="text-xs font-medium text-muted-fg">المخزون</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={variant.inventory}
+                            onChange={(event) =>
+                              updateVariant(
+                                product.id,
+                                index,
+                                "inventory",
+                                Number(event.target.value),
+                              )
+                            }
+                            className="form-input"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => removeVariant(product.id, index)}
+                          disabled={draft.variants.length <= 1}
+                          className="self-end rounded-lg p-2 text-red-500 hover:bg-red-50 disabled:opacity-40"
+                          title="حذف اللون"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
                   <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
-                    <Tag className="mb-1 inline h-3.5 w-3.5" /> بعد الحفظ، سيظهر السعر الجديد في
-                    المتجر ولوحة التحكم.
+                    <Tag className="mb-1 inline h-3.5 w-3.5" /> بعد الحفظ، سيظهر السعر والألوان
+                    الجديدة في المتجر ولوحة التحكم.
                   </div>
                   <div className="mt-4 flex gap-2">
                     <button

@@ -233,9 +233,16 @@ export default function AdminOrdersPage() {
                       <Badge variant="neutral">{order.itemCount} منتج</Badge>
                     </div>
                     <p className="mt-2 text-sm text-body">
-                      {order.customerName ?? order.email}
+                      {order.customerName}
                     </p>
-                    <p className="text-xs text-subtle">{order.email}</p>
+                    <p className="text-xs text-subtle">
+                      {order.phone}
+                      {order.gender ? ` · ${order.gender}` : ""}
+                    </p>
+                    <p className="text-xs text-subtle">
+                      {order.address}
+                      {order.city ? `، ${order.city}` : ""}
+                    </p>
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-subtle">
                       <span>{formatDate(order.createdAt)}</span>
                       <span className="inline-flex items-center gap-1">

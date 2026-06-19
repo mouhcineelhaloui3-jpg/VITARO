@@ -132,7 +132,11 @@ export function CartDrawer({ product, whatsappPhone }: CartDrawerProps) {
                 className="w-full"
                 size="lg"
                 onClick={() => {
-                  window.location.href = "/checkout";
+                  const params = new URLSearchParams({
+                    product: cartProduct.slug,
+                    qty: String(quantity),
+                  });
+                  window.location.href = `/checkout?${params.toString()}`;
                 }}
               >
                 إتمام الطلب بأمان

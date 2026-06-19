@@ -8,7 +8,7 @@ export const brand = {
     "فيتارو تبني أجهزة صحية متصلة فاخرة تجعل العناية الشخصية بالصحة أكثر وضوحاً وهدوءاً وسهولة في العمل بها.",
   supportEmail: "care@vitaro.ma",
   whatsapp: "+212 682 217 644",
-  address: "منطقة الصحة الممتازة، المغرب",
+  address: "بني ملال، المغرب",
   colors: {
     primary: "#111111",
     background: "#FAFAFA",
