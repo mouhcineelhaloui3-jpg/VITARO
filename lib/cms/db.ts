@@ -31,7 +31,7 @@ export async function getProducts(): Promise<Product[]> {
     const { prisma } = await import("@/lib/prisma");
     const rows = await prisma.product.findMany({
       where: { status: "active" },
-      include: { variants: true },
+      include: { variants: true, category: true },
     });
     if (rows.length === 0) return staticProducts;
     return rows.map(mapDbProduct);
@@ -46,7 +46,7 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
     const { prisma } = await import("@/lib/prisma");
     const row = await prisma.product.findUnique({
       where: { slug },
-      include: { variants: true },
+      include: { variants: true, category: true },
     });
     if (!row) return staticProducts.find((p) => p.slug === slug);
     return mapDbProduct(row);
@@ -56,7 +56,43 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 }
 
 export async function getCollections(): Promise<Collection[]> {
-  return staticCollections;
+  if (!hasDb()) return staticCollections;
+
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const rows = await prisma.category.findMany({
+      include: { products: { select: { slug: true } } },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    });
+
+    if (rows.length === 0) return staticCollections;
+
+    return rows.map((row) => ({
+      id: row.slug,
+      slug: row.slug,
+      name: row.name,
+      eyebrow: row.eyebrow ?? "",
+      description: row.description ?? "",
+      productIds: row.products.map((product) => product.slug),
+      futureReady: !row.active,
+    }));
+  } catch {
+    return staticCollections;
+  }
+}
+
+export async function getCollectionBySlug(slug: string): Promise<Collection | undefined> {
+  const all = await getCollections();
+  return all.find((collection) => collection.slug === slug);
+}
+
+export async function getProductsForCollection(collectionSlug: string): Promise<Product[]> {
+  const products = await getProducts();
+  return products.filter(
+    (product) =>
+      product.collectionIds.includes(collectionSlug) ||
+      product.categoryId === collectionSlug,
+  );
 }
 
 // ─── BRAND / SETTINGS ──────────────────────────────────────────────────────
@@ -172,6 +208,7 @@ type DbProduct = {
   imagesJson: string | null;
   metadataJson: string | null;
   tags: string | null;
+  category: { slug: string } | null;
   variants: {
     id: string;
     name: string;
@@ -200,6 +237,7 @@ function mapDbProduct(row: DbProduct): Product {
   }
 
   const staticMatch = staticProducts.find((p) => p.slug === row.slug);
+  const categorySlug = row.category?.slug ?? staticMatch?.categoryId ?? "";
 
   return {
     id: row.id,
@@ -216,8 +254,10 @@ function mapDbProduct(row: DbProduct): Product {
     inventory: (row.variants ?? []).reduce((s, v) => s + v.inventory, 0),
     tags: row.tags ? row.tags.split(",").map((t) => t.trim()) : (staticMatch?.tags ?? []),
     images: images.length > 0 ? images : (staticMatch?.images ?? []),
-    categoryId: staticMatch?.categoryId ?? "",
-    collectionIds: staticMatch?.collectionIds ?? [],
+    categoryId: categorySlug,
+    collectionIds: categorySlug
+      ? [categorySlug]
+      : (staticMatch?.collectionIds ?? []),
     variants: (row.variants ?? []).map((v) => ({
       id: v.id,
       name: v.name,

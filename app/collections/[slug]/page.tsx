@@ -7,22 +7,23 @@ import { Section } from "@/components/layout/section";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
-  collections,
   getCollectionBySlug,
+  getCollections,
   getProductsForCollection,
-} from "@/lib/data/catalog";
+} from "@/lib/cms/db";
 
 type CollectionPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const collections = await getCollections();
   return collections.map((collection) => ({ slug: collection.slug }));
 }
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const collection = getCollectionBySlug(slug);
+  const collection = await getCollectionBySlug(slug);
 
   return {
     title: collection?.name ?? "Collection",
@@ -32,13 +33,13 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 
 export default async function CollectionPage({ params }: CollectionPageProps) {
   const { slug } = await params;
-  const collection = getCollectionBySlug(slug);
+  const collection = await getCollectionBySlug(slug);
 
   if (!collection) {
     notFound();
   }
 
-  const collectionProducts = getProductsForCollection(collection.id);
+  const collectionProducts = await getProductsForCollection(collection.slug);
 
   return (
     <Section

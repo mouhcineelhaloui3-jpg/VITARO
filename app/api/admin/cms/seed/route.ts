@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/auth-server";
 import { hasProductionDb, missingDbMessage } from "@/lib/cms/has-db";
 import { prisma } from "@/lib/prisma";
-import { products as staticProducts } from "@/lib/data/catalog";
+import { products as staticProducts, collections as staticCollections } from "@/lib/data/catalog";
 import {
   brand,
   testimonials,
@@ -118,8 +118,38 @@ export async function POST() {
     }
     results.faqs = await prisma.faqEntry.count();
 
-    // 4. Seed products
+    // 4. Seed categories / collections
+    const categorySlugMap = new Map<string, string>();
+    for (let i = 0; i < staticCollections.length; i++) {
+      const collection = staticCollections[i];
+      const row = await prisma.category.upsert({
+        where: { slug: collection.slug },
+        update: {
+          name: collection.name,
+          eyebrow: collection.eyebrow,
+          description: collection.description,
+          active: !collection.futureReady,
+          sortOrder: i,
+        },
+        create: {
+          slug: collection.slug,
+          name: collection.name,
+          eyebrow: collection.eyebrow,
+          description: collection.description,
+          active: !collection.futureReady,
+          sortOrder: i,
+        },
+      });
+      categorySlugMap.set(collection.slug, row.id);
+    }
+    results.categories = await prisma.category.count();
+
+    // 5. Seed products
     for (const p of staticProducts) {
+      const categoryId =
+        categorySlugMap.get(p.categoryId) ??
+        categorySlugMap.get(p.collectionIds[0] ?? "") ??
+        null;
       const existing = await prisma.product.findUnique({ where: { slug: p.slug } });
       if (!existing) {
         const metadata = {
@@ -147,6 +177,7 @@ export async function POST() {
             tags: p.tags?.join(","),
             imagesJson: JSON.stringify(p.images),
             metadataJson: JSON.stringify(metadata),
+            categoryId,
           },
         });
         // Seed variants
@@ -164,6 +195,11 @@ export async function POST() {
             });
           }
         }
+      } else if (!existing.categoryId && categoryId) {
+        await prisma.product.update({
+          where: { id: existing.id },
+          data: { categoryId },
+        });
       }
     }
     results.products = await prisma.product.count();

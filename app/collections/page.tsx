@@ -5,14 +5,16 @@ import { ProductCard } from "@/components/commerce/product-card";
 import { Section } from "@/components/layout/section";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { collections, products } from "@/lib/data/catalog";
+import { getCollections, getProducts } from "@/lib/cms/db";
 
 export const metadata = {
   title: "Collections",
   description: "Shop Vitaro connected health collections and future premium wellness devices.",
 };
 
-export default function CollectionsPage() {
+export default async function CollectionsPage() {
+  const [collections, products] = await Promise.all([getCollections(), getProducts()]);
+
   return (
     <>
       <Section

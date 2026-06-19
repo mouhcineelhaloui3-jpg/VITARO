@@ -2,7 +2,6 @@ import {
   defaultAnnouncement,
   defaultBlogArticles,
   defaultBrand,
-  defaultCollectionLinks,
   defaultFooter,
   defaultFooterHelpLinks,
   defaultHeader,
@@ -13,7 +12,7 @@ import {
   type NavItem,
 } from "@/lib/cms/defaults";
 import { buildWhatsAppUrl } from "@/lib/cms/whatsapp";
-import { getBrand, type BrandSettings } from "@/lib/cms/db";
+import { getBrand, getCollections, type BrandSettings } from "@/lib/cms/db";
 
 function hasDb(): boolean {
   const url = process.env.DATABASE_URL;
@@ -103,12 +102,13 @@ export type BlogArticle = {
 };
 
 export async function getSiteChrome(): Promise<SiteChrome> {
-  const [brand, headerMap, footerMap, navMap, homeBlocks] = await Promise.all([
+  const [brand, headerMap, footerMap, navMap, homeBlocks, collections] = await Promise.all([
     getBrand(),
     getConfigMap("header"),
     getConfigMap("footer"),
     getConfigMap("nav"),
     getContentMap("home"),
+    getCollections(),
   ]);
 
   const whatsappUrl = buildWhatsAppUrl(brand.whatsapp);
@@ -136,7 +136,10 @@ export async function getSiteChrome(): Promise<SiteChrome> {
       whatsappDisplay: brand.whatsapp,
       shopColumnTitle: footerMap.shopColumnTitle ?? defaultFooter.shopColumnTitle,
       helpColumnTitle: footerMap.helpColumnTitle ?? defaultFooter.helpColumnTitle,
-      collectionLinks: defaultCollectionLinks,
+      collectionLinks: collections.map((collection) => ({
+        name: collection.name,
+        href: `/collections/${collection.slug}`,
+      })),
       helpLinks,
     },
     announcement: {
