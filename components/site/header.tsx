@@ -43,7 +43,7 @@ export function Header({ header, featuredProduct, whatsappPhone }: HeaderProps) 
           </a>
           <CartDrawer product={featuredProduct} whatsappPhone={whatsappPhone} />
           <ButtonLink
-            className="hidden sm:inline-flex"
+            className="hidden sm:inline-flex hover:translate-y-0 hover:shadow-[0_4px_14px_rgba(5,150,105,0.25)]"
             href={header.productHref}
             variant="primary"
             size="sm"

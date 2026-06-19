@@ -21,7 +21,7 @@ export const brand = {
 
 export const navigation = [
   { label: "المنتج", href: "/products/smart-digital-body-scale" },
-  { label: "كيفاش تستعملو", href: "/#usage-guide" },
+  { label: "كيفاش كيخدم", href: "/#how" },
   { label: "آراء الزبناء", href: "/#reviews" },
   { label: "تواصل معانا", href: "/contact" },
 ];

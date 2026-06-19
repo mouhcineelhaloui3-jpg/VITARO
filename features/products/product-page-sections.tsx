@@ -118,6 +118,7 @@ export function ProductPageSections({ product, spacing }: ProductPageSectionsPro
       </Section>
 
       <Section
+        id="app"
         spacing={spacing}
         eyebrow={productPageCopy.app.eyebrow}
         title={productPageCopy.app.title}

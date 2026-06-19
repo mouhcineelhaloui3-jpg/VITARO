@@ -22,7 +22,7 @@ export function Footer({ footer }: FooterProps) {
             href={footer.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-7 inline-flex items-center gap-2.5 rounded-xl bg-[#25D366] px-6 py-3.5 text-[0.9375rem] font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            className="mt-7 inline-flex items-center gap-2.5 rounded-xl bg-[#25D366] px-6 py-3.5 text-[0.9375rem] font-semibold text-white transition-colors hover:bg-[#1fb85a]"
           >
             <MessageCircle className="h-5 w-5" />
             {footer.whatsappCta}
