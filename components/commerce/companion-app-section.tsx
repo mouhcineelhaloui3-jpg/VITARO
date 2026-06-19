@@ -83,7 +83,7 @@ export function CompanionAppSection({
             <div className="relative overflow-hidden rounded-[1.75rem] border border-border bg-section-bg">
               <div className="relative aspect-[4/3] w-full">
                 <Image
-                  src="/products/scale-app.png"
+                  src="/products/product-app-premium.png"
                   alt="تطبيق OKOK متصل بالميزان عبر البلوتوث"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"

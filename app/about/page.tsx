@@ -1,106 +1,86 @@
-import {
-  Cpu,
-  Globe2,
-  Microscope,
-  ShieldCheck,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { Gem, Headphones, Sparkles, Target } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { Section } from "@/components/layout/section";
-import { Badge } from "@/components/ui/badge";
-import { FeatureCard } from "@/components/ui/card";
-import { brand } from "@/lib/data/content";
+import { Card } from "@/components/ui/card";
+import { aboutCopy } from "@/lib/data/about-copy";
 
 export const metadata = {
-  title: "من نحن",
-  description: "اكتشف مهمة ورؤية وتقنية فيتارو وفلسفتها الصحية.",
+  title: "شكون حنا | فيتارو",
+  description:
+    "تعرف على فيتارو — علامة مغربية كتخلي متابعة صحتك بسيطة، واضحة، وموثوقة.",
 };
 
-export default function AboutPage() {
-  const visionCards: { icon: LucideIcon; title: string; body: string }[] = [
-    {
-      icon: Sparkles,
-      title: "فاخر بطبيعته",
-      body: "نظام علامتنا التجارية يعطي الأولوية للوضوح والهدوء وتفاصيل التجارة الإلكترونية عالية الموثوقية.",
-    },
-    {
-      icon: Globe2,
-      title: "جاهز عالمياً",
-      body: "هيكل مصمم لدعم اللغات المتعددة، العملات، والتسعير الإقليمي.",
-    },
-    {
-      icon: ShieldCheck,
-      title: "الثقة أولاً",
-      body: "السياسات والدعم والأمان والمصادقة حاضرة منذ اليوم الأول.",
-    },
-  ];
+const whyIcons: LucideIcon[] = [Target, Gem, Sparkles, Headphones];
 
+export default function AboutPage() {
   return (
     <>
-      <Section
-        background="white"
-        eyebrow="عن فيتارو"
-        title="علامة تجارية للصحة التقنية لرفاهية أهدأ وأوضح."
-        description={brand.description}
-      >
-        <div className="overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-accent to-accent-hover p-12 shadow-[0_20px_70px_rgba(5,150,105,0.3)] lg:p-16">
-          <Badge variant="success" className="border-white/30 bg-white/20 text-white">
-            المهمة
-          </Badge>
-          <h1 className="mt-8 max-w-4xl text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-6xl">
-            جعل الأجهزة الصحية المتصلة تبدو فاخرة وجديرة بالثقة وسهلة الاستخدام كل يوم.
-          </h1>
-        </div>
-      </Section>
-
-      <Section 
-        background="gray"
-        eyebrow="الرؤية" 
-        title="من جهاز رائد واحد إلى نظام صحي بيئي متكامل."
-      >
-        <div className="grid gap-6 md:grid-cols-3">
-          {visionCards.map((item) => (
-            <FeatureCard key={item.title}>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10">
-                <item.icon className="h-7 w-7 text-accent" />
-              </div>
-              <h2 className="mt-6 text-2xl font-bold tracking-tight text-heading">
-                {item.title}
-              </h2>
-              <p className="mt-4 leading-[1.75] text-body">{item.body}</p>
-            </FeatureCard>
+      <Section background="white" eyebrow={aboutCopy.intro.eyebrow} title={aboutCopy.intro.title}>
+        <div className="mx-auto max-w-3xl space-y-6 text-center">
+          {aboutCopy.intro.paragraphs.map((paragraph) => (
+            <p key={paragraph} className="text-lg leading-8 text-body">
+              {paragraph}
+            </p>
           ))}
         </div>
       </Section>
 
-      <Section 
-        background="white"
-        id="technology" 
-        eyebrow="التكنولوجيا" 
-        title="مصمم لعادات صحية دقيقة وتكاملات مستقبلية."
+      <Section
+        background="gray"
+        eyebrow={aboutCopy.mission.eyebrow}
+        title={aboutCopy.mission.title}
       >
-        <div className="grid gap-6 lg:grid-cols-2">
-          <FeatureCard>
-            <Cpu className="h-10 w-10 text-accent" />
-            <h2 className="mt-6 text-3xl font-bold tracking-tight text-heading">
-              أساس الجهاز المتصل
-            </h2>
-            <p className="mt-5 text-[1.0625rem] leading-[1.75] text-body">
-              يقدم المتجر مؤشرات المنتج، متغيرات الجهاز، وتثقيف المعاينة للتطبيق، ووصول الإدارة الموثق،
-              ومساحات البيانات الجاهزة للتكامل الصحي المستقبلي.
+        <div className="mx-auto max-w-3xl space-y-6 text-center">
+          {aboutCopy.mission.body.map((paragraph) => (
+            <p key={paragraph} className="text-lg leading-8 text-body">
+              {paragraph}
             </p>
-          </FeatureCard>
-          <FeatureCard>
-            <Microscope className="h-10 w-10 text-accent" />
-            <h2 className="mt-6 text-3xl font-bold tracking-tight text-heading">
-              فلسفة الصحة
-            </h2>
-            <p className="mt-5 text-[1.0625rem] leading-[1.75] text-body">
-              تقدم فيتارو بيانات العافية في شكل اتجاهات وسياق، مما يساعد العملاء على اتخاذ قرارات
-              روتينية أفضل دون تحويل كل رقم لموضوع طبي بحت.
+          ))}
+        </div>
+      </Section>
+
+      <Section background="white" eyebrow={aboutCopy.why.eyebrow} title={aboutCopy.why.title}>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {aboutCopy.why.cards.map((card, index) => {
+            const Icon = whyIcons[index];
+            return (
+              <Card
+                key={card.title}
+                className="border-white/70 bg-white/70 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-md"
+              >
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+                  <Icon className="h-6 w-6" strokeWidth={1.5} />
+                </div>
+                <h2 className="mt-5 text-lg font-bold tracking-tight text-heading">
+                  {card.title}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-body">{card.body}</p>
+              </Card>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section
+        background="gray"
+        eyebrow={aboutCopy.origin.eyebrow}
+        title={aboutCopy.origin.title}
+      >
+        <div className="mx-auto max-w-3xl space-y-6 text-center">
+          {aboutCopy.origin.paragraphs.map((paragraph) => (
+            <p key={paragraph} className="text-lg leading-8 text-body">
+              {paragraph}
             </p>
-          </FeatureCard>
+          ))}
+        </div>
+      </Section>
+
+      <Section background="white">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-emerald-100/80 bg-gradient-to-br from-emerald-50/70 to-white px-8 py-14 text-center shadow-[0_20px_60px_rgba(15,23,42,0.05)] sm:px-12">
+          <p className="text-2xl font-bold leading-relaxed tracking-tight text-heading sm:text-3xl">
+            {aboutCopy.closing.statement}
+          </p>
         </div>
       </Section>
     </>
