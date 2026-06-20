@@ -32,7 +32,7 @@ export function CompanionAppSection({
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <Card className="overflow-hidden border-emerald-100 bg-gradient-to-br from-emerald-50/80 to-white p-6 sm:p-8">
           <div className="flex flex-wrap items-center gap-3">
-            <Badge variant="success">Bluetooth</Badge>
+            <Badge variant="success">بلوتوث</Badge>
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
               <Bluetooth className="h-4 w-4" />
               متصل بالميزان

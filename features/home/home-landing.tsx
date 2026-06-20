@@ -22,6 +22,15 @@ import {
 } from "lucide-react";
 
 import { Reveal } from "@/components/motion/reveal";
+import {
+  CtaFocus,
+  FinalCtaReveal,
+  HeroStagger,
+  HeroStaggerItem,
+  ProductShowcase,
+  StickyBuyBar,
+  UrgencyPulse,
+} from "@/components/motion/dtc-motion";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { homeLandingCopy } from "@/lib/data/home-landing-copy";
@@ -76,59 +85,72 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
         <div className="pointer-events-none absolute -right-16 bottom-20 h-80 w-80 rounded-full bg-teal-100/40 blur-3xl" />
 
         <div className="mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <div>
-            <Badge variant="success">{copy.hero.badge}</Badge>
-            <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-[-0.04em] text-heading sm:text-5xl lg:text-6xl">
-              {copy.hero.title}
-            </h1>
-            <p className="mt-5 max-w-lg text-lg leading-8 text-body">{copy.hero.subtitle}</p>
+          <HeroStagger>
+            <HeroStaggerItem>
+              <Badge variant="success">{copy.hero.badge}</Badge>
+            </HeroStaggerItem>
+            <HeroStaggerItem>
+              <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-[-0.04em] text-heading sm:text-5xl lg:text-6xl">
+                {copy.hero.title}
+              </h1>
+            </HeroStaggerItem>
+            <HeroStaggerItem>
+              <p className="mt-5 max-w-lg text-lg leading-8 text-body">{copy.hero.subtitle}</p>
+            </HeroStaggerItem>
+            <HeroStaggerItem>
+              <div className="mt-8 flex flex-wrap items-end gap-3">
+                <span className="text-4xl font-extrabold tracking-tight text-heading sm:text-5xl">
+                  {formatCurrency(product.price, product.currency)}
+                </span>
+                {product.compareAtPrice ? (
+                  <>
+                    <span className="pb-1 text-lg text-muted line-through">
+                      {formatCurrency(product.compareAtPrice, product.currency)}
+                    </span>
+                    {discount ? (
+                      <UrgencyPulse>
+                        <Badge variant="accent">-{discount}%</Badge>
+                      </UrgencyPulse>
+                    ) : null}
+                  </>
+                ) : null}
+              </div>
+            </HeroStaggerItem>
+            <HeroStaggerItem>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <CtaFocus>
+                  <ButtonLink href={productUrl} size="lg" className="hover:translate-y-0">
+                    {copy.hero.ctaBuy}
+                    <ArrowLeft className="h-5 w-5" />
+                  </ButtonLink>
+                </CtaFocus>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-14 items-center justify-center gap-2.5 rounded-[0.875rem] border-[1.5px] border-border bg-background px-9 text-base font-semibold text-heading transition-colors hover:bg-section-bg"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  {copy.hero.ctaWhatsapp}
+                </a>
+              </div>
+            </HeroStaggerItem>
+            <HeroStaggerItem>
+              <div className="mt-8 flex flex-wrap gap-5">
+                {copy.hero.trust.map((label, index) => {
+                  const Icon = heroTrustIcons[index];
+                  return (
+                    <span key={label} className="inline-flex items-center gap-2 text-sm font-medium text-body">
+                      <Icon className="h-4 w-4 text-accent" />
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+            </HeroStaggerItem>
+          </HeroStagger>
 
-            <div className="mt-8 flex flex-wrap items-end gap-3">
-              <span className="text-4xl font-extrabold tracking-tight text-heading sm:text-5xl">
-                {formatCurrency(product.price, product.currency)}
-              </span>
-              {product.compareAtPrice ? (
-                <>
-                  <span className="pb-1 text-lg text-muted line-through">
-                    {formatCurrency(product.compareAtPrice, product.currency)}
-                  </span>
-                  {discount ? (
-                    <Badge variant="accent">-{discount}%</Badge>
-                  ) : null}
-                </>
-              ) : null}
-            </div>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href={productUrl} size="lg">
-                {copy.hero.ctaBuy}
-                <ArrowLeft className="h-5 w-5" />
-              </ButtonLink>
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-14 items-center justify-center gap-2.5 rounded-[0.875rem] border-[1.5px] border-border bg-background px-9 text-base font-semibold text-heading transition-colors hover:bg-section-bg"
-              >
-                <MessageCircle className="h-5 w-5" />
-                {copy.hero.ctaWhatsapp}
-              </a>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-5">
-              {copy.hero.trust.map((label, index) => {
-                const Icon = heroTrustIcons[index];
-                return (
-                  <span key={label} className="inline-flex items-center gap-2 text-sm font-medium text-body">
-                    <Icon className="h-4 w-4 text-accent" />
-                    {label}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-xl">
+          <ProductShowcase className="relative mx-auto w-full max-w-xl">
             <div className="overflow-hidden rounded-[2rem] border border-white/60 bg-white/50 p-4 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-md sm:rounded-[2.5rem] sm:p-6">
               <div className="relative aspect-square overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-50 to-white">
                 <Image
@@ -141,7 +163,7 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
                 />
               </div>
             </div>
-          </div>
+          </ProductShowcase>
         </div>
       </section>
 
@@ -255,7 +277,7 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
       <section className={`px-4 sm:px-6 lg:px-8 ${pad} bg-section-bg/50`}>
         <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
           <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2.5rem] border border-white/70 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.1)]">
-            <Image src={copy.app.image} alt="تطبيق OKOK" fill sizes="420px" loading="lazy" className="object-cover" />
+            <Image src={copy.app.image} alt="تطبيق الرفقة" fill sizes="420px" loading="lazy" className="object-cover" />
           </div>
           <div>
             <Badge variant="success">{copy.app.eyebrow}</Badge>
@@ -344,16 +366,28 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
       </section>
 
       <section className="px-4 pb-24 pt-8 sm:px-6 lg:px-8 lg:pb-16">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 overflow-hidden rounded-[2.5rem] bg-[#0B1220] p-8 text-white sm:p-12 lg:grid-cols-2">
+        <FinalCtaReveal className="relative mx-auto grid max-w-7xl items-center gap-10 overflow-hidden rounded-[2.5rem] bg-[#0B1220] p-8 text-white sm:p-12 lg:grid-cols-2">
           <div>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{copy.finalCta.title}</h2>
-            <p className="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <motion.p
+              className="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl"
+              initial={{ opacity: 0, scale: 0.92 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+            >
               {formatCurrency(product.price, product.currency)}
-            </p>
+            </motion.p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href={productUrl} size="lg" className="bg-white text-emerald-700 hover:bg-white/95">
-                {copy.finalCta.ctaBuy}
-              </ButtonLink>
+              <CtaFocus tone="light">
+                <ButtonLink
+                  href={productUrl}
+                  size="lg"
+                  className="bg-white text-emerald-700 hover:bg-white/95 hover:translate-y-0"
+                >
+                  {copy.finalCta.ctaBuy}
+                </ButtonLink>
+              </CtaFocus>
               <a
                 href={whatsappUrl}
                 target="_blank"
@@ -365,7 +399,7 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
               </a>
             </div>
           </div>
-          <div className="relative mx-auto aspect-square w-full max-w-sm">
+          <ProductShowcase className="relative mx-auto aspect-square w-full max-w-sm">
             <Image
               src={product.images[0] ?? "/products/product-included-scale.png"}
               alt={product.title}
@@ -374,11 +408,11 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
               loading="lazy"
               className="object-contain"
             />
-          </div>
-        </div>
+          </ProductShowcase>
+        </FinalCtaReveal>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-white/95 p-3 shadow-[0_-12px_40px_rgba(15,23,42,0.12)] backdrop-blur-xl lg:hidden">
+      <StickyBuyBar className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-white/95 p-3 shadow-[0_-12px_40px_rgba(15,23,42,0.12)] backdrop-blur-xl lg:hidden">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-heading">{product.title}</p>
@@ -386,14 +420,16 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
               {formatCurrency(product.price, product.currency)}
             </p>
           </div>
-          <Link
-            href={productUrl}
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-accent px-5 text-sm font-semibold text-white"
-          >
-            {copy.hero.ctaBuy}
-          </Link>
+          <CtaFocus>
+            <Link
+              href={productUrl}
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-accent px-5 text-sm font-semibold text-white hover:translate-y-0"
+            >
+              {copy.hero.ctaBuy}
+            </Link>
+          </CtaFocus>
         </div>
-      </div>
+      </StickyBuyBar>
 
       <div className="h-20 lg:hidden" aria-hidden />
     </>

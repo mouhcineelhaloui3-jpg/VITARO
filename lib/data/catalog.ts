@@ -91,7 +91,7 @@ export const products: Product[] = [
       {
         title: "اتصال ذكي وسريع",
         description:
-          "كيتربط أوتوماتيكياً عبر البلوتوث مع تطبيق OKOK المتوافق مع أندرويد و آيفون (iOS).",
+          "كيتربط أوتوماتيكياً عبر البلوتوث مع تطبيق OKOK المتوافق مع أندرويد وآيفون.",
       },
       {
         title: "تابع تطورك بسهولة",
@@ -108,14 +108,14 @@ export const products: Product[] = [
       {
         group: "المؤشرات اللي كيقيس",
         items: [
-          { label: "الوزن", value: "Weight" },
-          { label: "مؤشر كتلة الجسم", value: "BMI" },
-          { label: "نسبة الشحم", value: "Body Fat %" },
-          { label: "الكتلة العضلية", value: "Muscle Mass" },
-          { label: "نسبة الماء", value: "Body Water" },
-          { label: "الدهون الحشوية", value: "Visceral Fat" },
-          { label: "كتلة العظام", value: "Bone Mass" },
-          { label: "معدل الأيض", value: "BMR" },
+          { label: "الوزن", value: "مدعوم" },
+          { label: "مؤشر كتلة الجسم", value: "مدعوم" },
+          { label: "نسبة الشحم", value: "نسبة مئوية" },
+          { label: "الكتلة العضلية", value: "مدعوم" },
+          { label: "نسبة الماء", value: "نسبة مئوية" },
+          { label: "الدهون الحشوية", value: "مدعوم" },
+          { label: "كتلة العظام", value: "مدعوم" },
+          { label: "معدل الأيض", value: "مدعوم" },
         ],
       },
       {
@@ -130,9 +130,9 @@ export const products: Product[] = [
       {
         group: "الاتصال والتطبيق",
         items: [
-          { label: "التطبيق", value: "OKOK International" },
-          { label: "الاتصال", value: "بلوتوث (Bluetooth)" },
-          { label: "التوافق", value: "أندرويد و آيفون iOS" },
+          { label: "التطبيق", value: "تطبيق OKOK" },
+          { label: "الاتصال", value: "بلوتوث" },
+          { label: "التوافق", value: "أندرويد وآيفون" },
           { label: "المستخدمين", value: "حسابات متعددة للعائلة" },
         ],
       },
@@ -145,7 +145,7 @@ export const products: Product[] = [
     ],
     usageSteps: [
       "حُط الميزان على أرض صلبة ومستوية (بعّد على الزربية ولا السجاد).",
-      `حمّل تطبيق ${companionApp.name} من Google Play وشغّل البلوتوث فتيليفونك.`,
+      `حمّل تطبيق ${companionApp.name} من متجر أندرويد وشغّل البلوتوث فتيليفونك.`,
       "طلع فوق الميزان حافي القدمين باش رجليك يلامسو المستشعرات الأربعة الفضية، وغادي تجيك كل المؤشرات كاملة فالتطبيق.",
     ],
     seo: {

@@ -3,9 +3,10 @@
 import { motion } from "framer-motion";
 import { Activity, Bone, Droplets, Dumbbell, Zap } from "lucide-react";
 
+import { biaMetricFields } from "@/lib/data/bia-fields";
 import { cn } from "@/lib/utils";
 
-const defaultFields = ["الدهون", "العضلات", "الماء", "العظام", "BMI", "BMR"] as const;
+const defaultFields = biaMetricFields;
 const fieldIcons = [Activity, Dumbbell, Droplets, Bone, Zap, Activity] as const;
 
 type BiaPulseVisualProps = {

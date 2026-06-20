@@ -14,7 +14,7 @@ export const homeLandingCopy = {
       { value: "+1000", label: "آلاف العملاء" },
       { value: "4×", label: "دقة عالية" },
       { value: "2", label: "ضمان سنتين" },
-      { value: "24h", label: "دعم سريع" },
+      { value: "24 ساعة", label: "دعم سريع" },
     ],
   },
   metrics: {
@@ -46,7 +46,7 @@ export const homeLandingCopy = {
   app: {
     eyebrow: "التطبيق الذكي",
     title: "كل القياسات، فمكان واحد.",
-    features: ["رسوم بيانية", "متابعة التقدم", "Bluetooth", "سجل القياسات", "حسابات العائلة"],
+    features: ["رسوم بيانية", "متابعة التقدم", "بلوتوث", "سجل القياسات", "حسابات العائلة"],
     image: "/products/product-app-premium.png",
     cta: "اكتشف التطبيق",
   },
@@ -62,8 +62,8 @@ export const homeLandingCopy = {
       image: "/products/scale-main.png",
     },
     {
-      title: "Bluetooth",
-      body: "مزامنة تلقائية مع OKOK.",
+      title: "بلوتوث",
+      body: "مزامنة تلقائية مع تطبيق OKOK.",
       image: "/products/product-step-2.png",
     },
     {

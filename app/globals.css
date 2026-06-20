@@ -232,6 +232,42 @@ html {
   }
 }
 
+@keyframes cta-shimmer-sweep {
+  0% {
+    transform: translateX(-130%) skewX(-14deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(230%) skewX(-14deg);
+    opacity: 0;
+  }
+}
+
+.cta-shimmer {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: 0.875rem;
+}
+
+.cta-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.32) 50%,
+    transparent 62%
+  );
+  animation: cta-shimmer-sweep 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .animate-fade-in {
   animation: fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }

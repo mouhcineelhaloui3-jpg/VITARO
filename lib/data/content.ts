@@ -28,7 +28,7 @@ export const navigation = [
 
 export const trustBadges = [
   "توصيل لجميع المدن",
-  "خلّص فالدار (COD)",
+  "خلّص فالدار",
   "ضمان سنتين",
   "دعم بالدارجة",
 ];

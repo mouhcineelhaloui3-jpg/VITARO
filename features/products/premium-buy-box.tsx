@@ -3,6 +3,12 @@
 import { useMemo, useState } from "react";
 import { MessageCircle, Minus, Plus, ShieldCheck, Truck, Wallet } from "lucide-react";
 
+import {
+  BuyBoxReveal,
+  CtaFocus,
+  StickyBuyBar,
+  UrgencyPulse,
+} from "@/components/motion/dtc-motion";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { productPageCopy } from "@/lib/data/product-page-copy";
@@ -58,13 +64,23 @@ export function PremiumBuyBox({ product, whatsappUrl }: PremiumBuyBoxProps) {
 
   return (
     <>
-      <div className="lg:sticky lg:top-28 lg:space-y-8">
+      <BuyBoxReveal className="lg:sticky lg:top-28 lg:space-y-8">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
-            {discount ? <Badge variant="accent">-{discount}% {productPageCopy.hero.discountLabel}</Badge> : null}
-            <Badge variant={lowStock ? "neutral" : "success"}>
-              {lowStock ? productPageCopy.hero.lowStock : productPageCopy.hero.inStock}
-            </Badge>
+            {discount ? (
+              <UrgencyPulse>
+                <Badge variant="accent">
+                  -{discount}% {productPageCopy.hero.discountLabel}
+                </Badge>
+              </UrgencyPulse>
+            ) : null}
+            {lowStock ? (
+              <UrgencyPulse>
+                <Badge variant="neutral">{productPageCopy.hero.lowStock}</Badge>
+              </UrgencyPulse>
+            ) : (
+              <Badge variant="success">{productPageCopy.hero.inStock}</Badge>
+            )}
           </div>
 
           <div>
@@ -137,24 +153,27 @@ export function PremiumBuyBox({ product, whatsappUrl }: PremiumBuyBoxProps) {
         </div>
 
         <div className="grid gap-3">
-          <ButtonLink
-            href={orderUrl}
-            size="lg"
-            onClick={() =>
-              trackEvent("begin_checkout", {
-                productId: product.id,
-                variantId: selectedVariant?.id,
-                quantity,
-              })
-            }
-          >
-            {productPageCopy.hero.ctaBuy}
-          </ButtonLink>
+          <CtaFocus fullWidth>
+            <ButtonLink
+              href={orderUrl}
+              size="lg"
+              className="w-full hover:translate-y-0"
+              onClick={() =>
+                trackEvent("begin_checkout", {
+                  productId: product.id,
+                  variantId: selectedVariant?.id,
+                  quantity,
+                })
+              }
+            >
+              {productPageCopy.hero.ctaBuy}
+            </ButtonLink>
+          </CtaFocus>
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative inline-flex h-14 w-full items-center justify-center gap-2.5 rounded-[0.875rem] border-[1.5px] border-border bg-background px-9 py-4 text-base font-semibold tracking-tight text-heading transition-all duration-200 hover:-translate-y-0.5 hover:border-subtle hover:bg-section-bg"
+            className="inline-flex h-14 w-full items-center justify-center gap-2.5 rounded-[0.875rem] border-[1.5px] border-border bg-background px-9 py-4 text-base font-semibold tracking-tight text-heading transition-colors hover:border-subtle hover:bg-section-bg"
             onClick={() =>
               trackEvent("whatsapp_click", {
                 productId: product.id,
@@ -178,9 +197,9 @@ export function PremiumBuyBox({ product, whatsappUrl }: PremiumBuyBoxProps) {
             );
           })}
         </div>
-      </div>
+      </BuyBoxReveal>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-white/90 p-3 shadow-[0_-12px_40px_rgba(15,23,42,0.12)] backdrop-blur-xl lg:hidden">
+      <StickyBuyBar className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-white/90 p-3 shadow-[0_-12px_40px_rgba(15,23,42,0.12)] backdrop-blur-xl lg:hidden">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-heading">{product.title}</p>
@@ -188,11 +207,13 @@ export function PremiumBuyBox({ product, whatsappUrl }: PremiumBuyBoxProps) {
               {formatCurrency(selectedVariant?.price ?? product.price, product.currency)}
             </p>
           </div>
-          <ButtonLink href={orderUrl} size="sm">
-            {productPageCopy.hero.ctaBuy}
-          </ButtonLink>
+          <CtaFocus>
+            <ButtonLink href={orderUrl} size="sm" className="hover:translate-y-0">
+              {productPageCopy.hero.ctaBuy}
+            </ButtonLink>
+          </CtaFocus>
         </div>
-      </div>
+      </StickyBuyBar>
     </>
   );
 }
