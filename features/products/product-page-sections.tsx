@@ -2,6 +2,7 @@ import Image from "next/image";
 import { BarChart3, Activity, Bluetooth, Smartphone, Users } from "lucide-react";
 
 import { Section } from "@/components/layout/section";
+import { BiaAnimatedBlock } from "@/features/products/bia-animated-block";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { companionApp } from "@/lib/data/companion-app";
@@ -101,20 +102,11 @@ export function ProductPageSections({ product, spacing }: ProductPageSectionsPro
       </Section>
 
       <Section spacing={spacing} eyebrow={productPageCopy.bia.eyebrow} title={productPageCopy.bia.title}>
-        <div className="mx-auto grid max-w-5xl items-center gap-8 overflow-hidden rounded-[2rem] border border-emerald-100/80 bg-gradient-to-br from-emerald-50/60 to-white shadow-[0_20px_60px_rgba(15,23,42,0.05)] lg:grid-cols-2">
-          <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[420px]">
-            <Image
-              src={productPageCopy.bia.image}
-              alt="استعمال ميزان فيتارو"
-              fill
-              sizes="(max-width: 1024px) 90vw, 480px"
-              className="object-cover"
-            />
-          </div>
-          <div className="p-8 sm:p-10">
-            <p className="text-lg leading-8 text-body">{productPageCopy.bia.body}</p>
-          </div>
-        </div>
+        <BiaAnimatedBlock
+          body={productPageCopy.bia.body}
+          image={productPageCopy.bia.image}
+          imageAlt="استعمال ميزان فيتارو"
+        />
       </Section>
 
       <Section

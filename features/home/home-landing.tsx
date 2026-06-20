@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Activity,
   ArrowLeft,
@@ -20,6 +21,7 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { Reveal } from "@/components/motion/reveal";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { homeLandingCopy } from "@/lib/data/home-landing-copy";
@@ -171,27 +173,32 @@ export function HomeLanding({ product, whatsappUrl, spacing }: HomeLandingProps)
         </div>
       </section>
 
-      <section className={`px-4 sm:px-6 lg:px-8 ${pad}`}>
+      <section id="metrics" className={`px-4 sm:px-6 lg:px-8 ${pad}`}>
         <div className="mx-auto max-w-7xl">
-          <div className={`mx-auto max-w-2xl text-center ${headPad}`}>
+          <Reveal className={`mx-auto max-w-2xl text-center ${headPad}`}>
             <Badge variant="success">{copy.metrics.eyebrow}</Badge>
             <h2 className="mt-5 text-3xl font-bold tracking-tight text-heading sm:text-4xl">
               {copy.metrics.title}
             </h2>
-          </div>
+          </Reveal>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {copy.metrics.items.map((item) => {
+            {copy.metrics.items.map((item, index) => {
               const Icon = metricIcons[item.icon];
               return (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-4 rounded-[1.75rem] border border-border/80 bg-card p-5 shadow-sm"
-                >
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
-                    <Icon className="h-6 w-6" />
+                <Reveal key={item.label} delay={index * 0.07}>
+                  <div className="flex items-center gap-4 rounded-[1.75rem] border border-border/80 bg-card p-5 shadow-sm">
+                    <motion.div
+                      className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"
+                      initial={{ scale: 0.92, opacity: 0.6 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.07 + 0.15, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <Icon className="h-6 w-6" />
+                    </motion.div>
+                    <h3 className="text-lg font-bold text-heading">{item.label}</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-heading">{item.label}</h3>
-                </div>
+                </Reveal>
               );
             })}
           </div>
